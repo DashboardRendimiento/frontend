@@ -198,6 +198,7 @@ export class ApiService {
     return this.http.get<any>(`${this.baseUrl}/productividad/kpi/${empleadoId}`).pipe(
       catchError(err => {
         console.warn(` [ApiService] Mocking KPI para empleado ${empleadoId}`);
+        return of(null);
       })
     );
   }

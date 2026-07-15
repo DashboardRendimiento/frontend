@@ -19,7 +19,6 @@
         <th style="padding: 12px;">Turno</th>
         <th style="padding: 12px; text-align: right;">Obj. Diario</th>
         <th *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">Pedidos/Hora</th>
-        <th *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">Bultos/Hora</th>
         <th *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">Pendientes</th>
         <th *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">% Cumplimiento</th>
       </tr>
@@ -27,7 +26,7 @@
     <tbody>
       <!-- Empty state when no search results found -->
       <tr *ngIf="filteredData.length === 0">
-        <td colspan="9" style="padding: 24px; text-align: center; color: #64748b; font-size: 14px;">
+        <td colspan="8" style="padding: 24px; text-align: center; color: #64748b; font-size: 14px;">
           No se encontraron operarios que coincidan con la búsqueda.
         </td>
       </tr>
@@ -41,7 +40,6 @@
         <td style="padding: 12px; color: #6c757d;">{{ emp.shift }}</td>
         <td style="padding: 12px; text-align: right; font-weight: 600; color: #2563eb;">{{ emp.objetivoDiario || 0 }}</td>
         <td *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">{{ emp.pedidosPorHora ? (emp.pedidosPorHora | number:'1.1-1') : '0.0' }}</td>
-        <td *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">{{ emp.bultosPorHora ? (emp.bultosPorHora | number:'1.1-1') : '0.0' }}</td>
         <td *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right; color: #ef4444; font-weight: 600;">{{ emp.totalPendientes | number }}</td>
         <td *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right; font-weight: 600; color: #059669;">
           {{ emp.porcentajeCumplimiento ? (emp.porcentajeCumplimiento | number:'1.1-1') : '0.0' }}%

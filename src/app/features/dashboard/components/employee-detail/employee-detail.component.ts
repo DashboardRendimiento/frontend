@@ -1,4 +1,4 @@
-﻿import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ChangeDetectorRef, inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ChangeDetectorRef, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EmployeePerformance } from '../../../../core/models/employee.model';
@@ -23,11 +23,13 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   fechaFin: string = '';
   tipoFiltro: string = 'mes-actual';
 
-  // Promedios de perÃ­odo cargados del backend
+  // Promedios de período cargados del backend
   periodKpis = {
     pedidosPorHora: null as number | null,
+    bultosPorHora: null as number | null,
     totalHoras: null as number | null,
     pedidosPorJornada: null as number | null,
+    bultosPorJornada: null as number | null,
     totalJornadas: null as number | null,
     cargando: false
   };
@@ -39,11 +41,11 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   mostrarNotificacionFaltantes: boolean = false;
   mostrarNotificacionIncumplido: boolean = false;
 
-  // AsignaciÃ³n de pedidos por Admin
+  // Asignación de pedidos por Admin
   pedidosAAsignar: number | null = null;
   asignandoPedidos: boolean = false;
 
-  // Alerta y ConfirmaciÃ³n Personalizada
+  // Alerta y Confirmación Personalizada
   customAlert = {
     mostrar: false,
     titulo: '',
@@ -73,7 +75,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   productivityLogs: any[] = [];
   filteredLogs: any[] = [];
 
-  // MÃ©tricas del perÃ­odo filtrado
+  // Métricas del período filtrado
   periodUnits: number = 0;
   periodEfficiency: number = 100;
   periodErrors: number = 0;
@@ -81,7 +83,8 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   // KPI Global del backend
   employeeKpi: any = null;
 
-  // Propiedades de grÃ¡ficos individuales
+  // Propiedades de gráficos individuales
+  public dailyBultosChartOptions: any;
   public dailyEfficiencyChartOptions: any;
 
   // Asistencia y Horario del empleado
@@ -98,7 +101,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   private pollInterval: any = null;
 
   // Calendario
-  readonly diasSemana = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'SÃ¡', 'Do'];
+  readonly diasSemana = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'];
   mesActual = new Date().getMonth();
   anioActual = new Date().getFullYear();
 
@@ -132,7 +135,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     this.cargarPromediosPeriodo();
     this.cargarHorarioYAsistencia();
 
-    // Polling cada 15 segundos para mantener objetivos y asistencia al dÃ­a
+    // Polling cada 15 segundos para mantener objetivos y asistencia al día
     if (typeof window !== 'undefined') {
       this.pollInterval = setInterval(() => {
         this.cargarReportesFiltrados();
@@ -167,27 +170,33 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
         this.periodKpis.cargando = false;
         if (res.promedioHora) {
           this.periodKpis.pedidosPorHora = res.promedioHora.promedioPedidos;
+          this.periodKpis.bultosPorHora = res.promedioHora.promedioBultos;
           this.periodKpis.totalHoras = res.promedioHora.totalJornadasOHoras;
         } else {
           this.periodKpis.pedidosPorHora = null;
+          this.periodKpis.bultosPorHora = null;
           this.periodKpis.totalHoras = null;
         }
 
         if (res.promedioJornada) {
           this.periodKpis.pedidosPorJornada = res.promedioJornada.promedioPedidos;
+          this.periodKpis.bultosPorJornada = res.promedioJornada.promedioBultos;
           this.periodKpis.totalJornadas = res.promedioJornada.totalJornadasOHoras;
         } else {
           this.periodKpis.pedidosPorJornada = null;
+          this.periodKpis.bultosPorJornada = null;
           this.periodKpis.totalJornadas = null;
         }
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error al cargar promedios del perÃ­odo:', err);
+        console.error('Error al cargar promedios del período:', err);
         this.periodKpis.cargando = false;
         this.periodKpis.pedidosPorHora = null;
+        this.periodKpis.bultosPorHora = null;
         this.periodKpis.totalHoras = null;
         this.periodKpis.pedidosPorJornada = null;
+        this.periodKpis.bultosPorJornada = null;
         this.periodKpis.totalJornadas = null;
         this.cdr.detectChanges();
       }
@@ -206,7 +215,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     const hoy = new Date();
     this.fechaFin = this.getLocalStartDate(hoy);
 
-    // Por defecto, mostrar los Ãºltimos 30 dÃ­as para asegurar que se vean los registros recientes
+    // Por defecto, mostrar los últimos 30 días para asegurar que se vean los registros recientes
     const hace30Dias = new Date();
     hace30Dias.setDate(hoy.getDate() - 30);
     this.fechaInicio = this.getLocalStartDate(hace30Dias);
@@ -246,16 +255,17 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     const start = this.fechaInicio || '0000-00-00';
     const end = this.fechaFin || '9999-99-99';
 
-    // ComparaciÃ³n lexicogrÃ¡fica de cadenas (inmune a desvÃ­os de zona horaria)
+    // Comparación lexicográfica de cadenas (inmune a desvíos de zona horaria)
     this.filteredLogs = this.productivityLogs.filter(log => {
       if (!log.fecha) return false;
       return log.fecha >= start && log.fecha <= end;
     }).sort((a, b) => b.fecha.localeCompare(a.fecha));
 
-    // Calcular mÃ©tricas para el perÃ­odo seleccionado
+    // Calcular métricas para el período seleccionado
+    this.periodUnits = this.filteredLogs.reduce((sum, r) => sum + (r.bultosPreparados || 0), 0);
     this.periodErrors = this.employee.errors || 0;
 
-    // Agrupar por fecha para no duplicar el objetivo diario en la mÃ©trica del perÃ­odo
+    // Agrupar por fecha para no duplicar el objetivo diario en la métrica del período
     const encargadosPorFecha: Record<string, number> = {};
     const preparadosPorFecha: Record<string, number> = {};
     
@@ -277,7 +287,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
 
     this.initDetailCharts();
 
-    // LÃ³gica para detectar si faltan completar productos hoy (sumando todos los registros de hoy)
+    // Lógica para detectar si faltan completar productos hoy (sumando todos los registros de hoy)
     const hoy = this.getLocalStartDate(new Date());
     const logsHoy = this.filteredLogs.filter(l => l.fecha === hoy);
     const preparadosHoy = logsHoy.reduce((sum, l) => sum + (l.pedidosPreparados || 0), 0);
@@ -316,12 +326,12 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Forzar actualizaciÃ³n visual tras aplicar el filtro
+    // Forzar actualización visual tras aplicar el filtro
     this.cdr.detectChanges();
   }
 
   initDetailCharts(): void {
-    // Tomar los logs ordenados por fecha ascendente para mostrar evoluciÃ³n temporal
+    // Tomar los logs ordenados por fecha ascendente para mostrar evolución temporal
     const chronologicalLogs = [...this.filteredLogs].reverse();
     const dates = chronologicalLogs.map(log => {
       if (!log.fecha) return '';
@@ -331,15 +341,20 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
       }
       return log.fecha;
     });
+    const bultos = chronologicalLogs.map(log => log.bultosPreparados || 0);
     const efficiencies = chronologicalLogs.map(log => {
       if (log.pedidosEncargados && log.pedidosEncargados > 0) {
         return Math.round(((log.pedidosPreparados || 0) / log.pedidosEncargados) * 1000) / 10;
       }
-      return this.employee.efficiencyRate; // Usar la eficacia histÃ³rica real en vez del 100% ficticio
+      return this.employee.efficiencyRate; // Usar la eficacia histórica real en vez del 100% ficticio
     });
 
+    // 1. Gráfico de Barras: Bultos por Día
+    this.dailyBultosChartOptions = {
       series: [
         {
+          name: "Bultos Preparados",
+          data: bultos
         }
       ],
       chart: {
@@ -379,7 +394,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
       }
     };
 
-    // 2. GrÃ¡fico de Ãrea (Nuevo Modelo): Eficacia por DÃ­a
+    // 2. Gráfico de Área (Nuevo Modelo): Eficacia por Día
     this.dailyEfficiencyChartOptions = {
       series: [
         {
@@ -388,7 +403,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
         }
       ],
       chart: {
-        type: "area", // Cambiado a Ã¡rea
+        type: "area", // Cambiado a área
         height: 280,
         toolbar: { show: false }
       },
@@ -427,7 +442,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
           borderColor: '#a7f3d0'
         }
       },
-      colors: ["#10b981"], // Usamos verde brillante para la lÃ­nea y el degradado del Ã¡rea
+      colors: ["#10b981"], // Usamos verde brillante para la línea y el degradado del área
       xaxis: {
         categories: dates,
         labels: { style: { colors: "#64748b" } }
@@ -460,7 +475,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     if (this.isEmployeeUser) {
       // 1. Aplicar Fallback de Horarios directamente para empleados (evita 403 en consola)
       this.hasSchedule = true;
-      const shiftStr = this.employee.shift || 'MaÃ±ana';
+      const shiftStr = this.employee.shift || 'Mañana';
       let startTime = '06:00';
       let endTime = '14:00';
       if (shiftStr.toLowerCase().includes('tarde')) {
@@ -502,7 +517,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
         this.attendanceHistory = [];
         this.stopTimer();
 
-        // AUTO-ABRIR CÃMARA PARA EMPLEADOS SIN FICHAR HOY
+        // AUTO-ABRIR CÁMARA PARA EMPLEADOS SIN FICHAR HOY
         setTimeout(() => {
           this.abrirModalCamara();
           this.cdr.detectChanges();
@@ -513,7 +528,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // CÃ³digo original para Administradores / Supervisores (tienen permisos de lectura en el backend)
+    // Código original para Administradores / Supervisores (tienen permisos de lectura en el backend)
     this.apiService.getWorkSchedule(numericId).subscribe({
       next: (schedule) => {
         if (schedule) {
@@ -622,10 +637,10 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     const map: Record<string, string> = {
       MONDAY: 'Lunes',
       TUESDAY: 'Martes',
-      WEDNESDAY: 'MiÃ©rcoles',
+      WEDNESDAY: 'Miércoles',
       THURSDAY: 'Jueves',
       FRIDAY: 'Viernes',
-      SATURDAY: 'SÃ¡bado',
+      SATURDAY: 'Sábado',
       SUNDAY: 'Domingo'
     };
     const translated = days.map(d => map[d] || d);
@@ -633,7 +648,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
       return 'Lunes a Viernes';
     }
     if (translated.length === 6 && days.includes('MONDAY') && days.includes('SATURDAY')) {
-      return 'Lunes a SÃ¡bado';
+      return 'Lunes a Sábado';
     }
     return translated.join(', ');
   }
@@ -671,7 +686,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     this.abrirModalCamara();
   }
 
-  // --- MÃ‰TODOS PARA RECONOCIMIENTO FACIAL ---
+  // --- MÉTODOS PARA RECONOCIMIENTO FACIAL ---
   abrirModalCamara(): void {
     this.mostrarModalCamara = true;
     this.fotoCapturadaUrl = null;
@@ -697,11 +712,11 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
           }, 0);
         })
         .catch(err => {
-          console.error('Error al acceder a la cÃ¡mara:', err);
-          this.mostrarAlerta('Permiso denegado', 'No se pudo acceder a la cÃ¡mara. Revisa los permisos del navegador.', 'error');
+          console.error('Error al acceder a la cámara:', err);
+          this.mostrarAlerta('Permiso denegado', 'No se pudo acceder a la cámara. Revisa los permisos del navegador.', 'error');
         });
     } else {
-      this.mostrarAlerta('No compatible', 'Tu navegador no soporta el acceso a la cÃ¡mara web.', 'error');
+      this.mostrarAlerta('No compatible', 'Tu navegador no soporta el acceso a la cámara web.', 'error');
     }
   }
 
@@ -753,7 +768,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
           localStorage.setItem('active_clockin_' + numericId, JSON.stringify(res));
         }
         this.cargarHorarioYAsistencia();
-        this.mostrarAlerta('Ã‰xito', 'Fichaje de entrada registrado correctamente.', 'success');
+        this.mostrarAlerta('Éxito', 'Fichaje de entrada registrado correctamente.', 'success');
       },
       error: (err) => {
         console.error('Error al fichar entrada con foto:', err);
@@ -772,7 +787,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
           }
           this.startTimer(nowStr);
           this.cerrarModalCamara();
-          this.mostrarAlerta('Sincronizado', 'Ya tenÃ­as un fichaje de entrada registrado. Se ha sincronizado el estado.', 'info');
+          this.mostrarAlerta('Sincronizado', 'Ya tenías un fichaje de entrada registrado. Se ha sincronizado el estado.', 'info');
         } else {
           this.mostrarAlerta('Error de Fichaje', err.error?.message || 'No se pudo fichar la entrada.', 'error');
         }
@@ -792,7 +807,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
           localStorage.setItem('active_clockin_' + numericId, JSON.stringify(res));
         }
         this.cargarHorarioYAsistencia();
-        this.mostrarAlerta('Ã‰xito', 'Fichaje de entrada registrado correctamente.', 'success');
+        this.mostrarAlerta('Éxito', 'Fichaje de entrada registrado correctamente.', 'success');
       },
       error: (err) => {
         console.error('Error al fichar entrada sin foto:', err);
@@ -811,7 +826,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
           }
           this.startTimer(nowStr);
           this.cerrarModalCamara();
-          this.mostrarAlerta('Sincronizado', 'Ya tenÃ­as un fichaje de entrada registrado. Se ha sincronizado el estado.', 'info');
+          this.mostrarAlerta('Sincronizado', 'Ya tenías un fichaje de entrada registrado. Se ha sincronizado el estado.', 'info');
         } else {
           this.mostrarAlerta('Error de Fichaje', err.error?.message || 'No se pudo fichar la entrada.', 'error');
         }
@@ -843,7 +858,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   registrarSalida(): void {
     if (this.capturandoFoto) return;
     
-    // 1. Verificar si estÃ¡ saliendo antes de la hora de fin programada
+    // 1. Verificar si está saliendo antes de la hora de fin programada
     let clockInDate = new Date();
     if (this.activeRecord && this.activeRecord.clockInAt) {
       clockInDate = new Date(this.activeRecord.clockInAt);
@@ -863,7 +878,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
             localStorage.removeItem('active_clockin_' + numericId);
           }
           this.cargarHorarioYAsistencia();
-          this.mostrarAlerta('Ã‰xito', 'Fichaje de salida registrado correctamente.', 'success');
+          this.mostrarAlerta('Éxito', 'Fichaje de salida registrado correctamente.', 'success');
         },
         error: (err) => {
           console.error('Error al fichar salida:', err);
@@ -885,7 +900,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
       const scheduledEndStr = scheduledEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       this.mostrarConfirmacion(
         'Salida Anticipada',
-        `Â¡AtenciÃ³n! AÃºn no es tu hora de salida programada (${scheduledEndStr}). Â¿EstÃ¡s seguro de que deseas fichar la salida antes de tiempo?`,
+        `¡Atención! Aún no es tu hora de salida programada (${scheduledEndStr}). ¿Estás seguro de que deseas fichar la salida antes de tiempo?`,
         procederSalida
       );
     } else {
@@ -942,7 +957,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  // --- MÃ‰TODOS PARA PRODUCTIVIDAD ---
+  // --- MÉTODOS PARA PRODUCTIVIDAD ---
   abrirFormularioProductividad(): void {
     this.mostrarFormularioProductividad = true;
     this.nuevaProductividad.empleado = parseInt(this.employee.id.replace('EMP-', ''), 10);
@@ -980,14 +995,14 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   guardarProductividad(): void {
     console.log("Valores a validar:", this.nuevaProductividad);
 
-    // Forzamos conversiÃ³n a nÃºmero por si el binding de angular (ngModel) los tratÃ³ como string (defaulting to 0 if empty)
+    // Forzamos conversión a número por si el binding de angular (ngModel) los trató como string (defaulting to 0 if empty)
     this.nuevaProductividad.pedidosEncargados = this.nuevaProductividad.pedidosEncargados != null ? Number(this.nuevaProductividad.pedidosEncargados) : 0;
     this.nuevaProductividad.pedidosPreparados = this.nuevaProductividad.pedidosPreparados != null ? Number(this.nuevaProductividad.pedidosPreparados) : 0;
 
     if (!this.nuevaProductividad.empleado || !this.nuevaProductividad.fecha ||
         isNaN(this.nuevaProductividad.pedidosEncargados) ||
         isNaN(this.nuevaProductividad.pedidosPreparados)) {
-      this.mostrarAlerta('AtenciÃ³n', 'Por favor complete todos los campos obligatorios con nÃºmeros vÃ¡lidos.', 'warning');
+      this.mostrarAlerta('Atención', 'Por favor complete todos los campos obligatorios con números válidos.', 'warning');
       return;
     }
 
@@ -995,14 +1010,14 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
 
     this.apiService.registrarProductividad(this.nuevaProductividad as any).subscribe({
       next: (res) => {
-        console.log('Productividad registrada con Ã©xito:', res);
+        console.log('Productividad registrada con éxito:', res);
         this.cerrarFormularioProductividad();
-        this.mostrarAlerta('Ã‰xito', 'Productividad registrada con Ã©xito.', 'success');
+        this.mostrarAlerta('Éxito', 'Productividad registrada con éxito.', 'success');
         this.cargarReportesFiltrados(); // Recargar datos locales
       },
       error: (err: any) => {
         console.error('Error detallado al registrar productividad:', err);
-        // Interceptar cuando la sesiÃ³n se desincroniza y el servidor no registra una entrada abierta
+        // Interceptar cuando la sesión se desincroniza y el servidor no registra una entrada abierta
         if (err.status === 409 && err.error?.message?.includes('no tiene un fichaje de entrada abierto')) {
           if (typeof window !== 'undefined') {
             localStorage.removeItem('active_clockin_' + this.nuevaProductividad.empleado);
@@ -1011,10 +1026,10 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
           this.activeRecord = null;
           this.stopTimer();
           this.cerrarFormularioProductividad();
-          this.mostrarAlerta('SesiÃ³n Expirada', 'Tu sesiÃ³n de fichaje se ha desincronizado (el servidor no registra tu entrada). Por favor, ficha la entrada antes de registrar tu productividad.', 'warning');
+          this.mostrarAlerta('Sesión Expirada', 'Tu sesión de fichaje se ha desincronizado (el servidor no registra tu entrada). Por favor, ficha la entrada antes de registrar tu productividad.', 'warning');
           this.abrirModalCamara();
         } else {
-          this.mostrarAlerta('Error de Registro', 'Error al guardar el registro de productividad en el servidor. Revisa la consola para mÃ¡s detalles.', 'error');
+          this.mostrarAlerta('Error de Registro', 'Error al guardar el registro de productividad en el servidor. Revisa la consola para más detalles.', 'error');
         }
       }
     });
@@ -1040,20 +1055,20 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
 
         request$.subscribe({
           next: () => {
-            this.mostrarAlerta('Objetivo Agregado', `Â¡Se han agregado ${this.pedidosAAsignar} pedidos diarios (${valorSemanalAdicional} semanales). Total: ${Math.round(valorSemanalTotal / 6)} diarios (${valorSemanalTotal} semanales) exitosamente!`, 'success');
+            this.mostrarAlerta('Objetivo Agregado', `¡Se han agregado ${this.pedidosAAsignar} pedidos diarios (${valorSemanalAdicional} semanales). Total: ${Math.round(valorSemanalTotal / 6)} diarios (${valorSemanalTotal} semanales) exitosamente!`, 'success');
             this.asignandoPedidos = false;
-            this.cargarHorarioYAsistencia(); // Esto recargarÃ¡ los objetivos y la UI
+            this.cargarHorarioYAsistencia(); // Esto recargará los objetivos y la UI
           },
           error: (err) => {
             console.error('Error al asignar el objetivo:', err);
-            this.mostrarAlerta('Error de AsignaciÃ³n', 'Error al asignar los pedidos.', 'error');
+            this.mostrarAlerta('Error de Asignación', 'Error al asignar los pedidos.', 'error');
             this.asignandoPedidos = false;
           }
         });
       },
       error: (err) => {
         console.error('Error al obtener objetivos antes de asignar:', err);
-        this.mostrarAlerta('Error de ConexiÃ³n', 'Error al verificar los objetivos existentes.', 'error');
+        this.mostrarAlerta('Error de Conexión', 'Error al verificar los objetivos existentes.', 'error');
         this.asignandoPedidos = false;
       }
     });
@@ -1102,4 +1117,3 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     if (cb) cb();
   }
 }
-
