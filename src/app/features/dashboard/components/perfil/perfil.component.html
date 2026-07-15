@@ -89,6 +89,29 @@
         </div>
         
       </div>
+
+      <!-- Plantilla de Horas Notification Card -->
+      <div *ngIf="plantillaHoras" style="margin-top: 24px; padding: 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+        <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Notificación de Horas (Hoy)
+        </h3>
+        <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+          <div>
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Horas Trabajadas</div>
+            <div style="font-size: 18px; font-weight: 700; color: #1e293b;">{{ plantillaHoras.horasTrabajadas }}h</div>
+          </div>
+          <div>
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Horas Extra</div>
+            <div style="font-size: 18px; font-weight: 700; color: #10b981;">{{ plantillaHoras.horasExtra }}h</div>
+          </div>
+          <div>
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Tardanza</div>
+            <div style="font-size: 18px; font-weight: 700; color: #ef4444;">{{ plantillaHoras.minutosTardanza }} min</div>
+          </div>
+        </div>
+      </div>
+      
     </div>
   </div>
 </div>

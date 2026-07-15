@@ -74,16 +74,15 @@ export class ApiService {
                 id: idStr,
                 name: displayName,
                 role: emp.puesto || 'Operario',
-                shift: emp.turno || 'Mañana',
+                shift: emp.turno || 'MaÃ±ana',
                 dni: emp.dni,
                 active: emp.active !== false,
                 totalPedidos: kpi ? kpi.totalPedidos : 0,
-                totalBultos: kpi ? kpi.totalBultos : 0,
                 totalPendientes: kpi ? kpi.pedidosPendientesObjetivo : 0,
                 pedidosPorHora: kpi ? kpi.pedidosPorHora : 0,
-                bultosPorHora: kpi ? kpi.bultosPorHora : 0,
                 promedioPedidosPorJornada: kpi ? kpi.promedioPedidosPorJornada : 0,
                 porcentajeCumplimiento: kpi ? kpi.porcentajeCumplimiento : 0,
+                ultimaHoraCarga: kpi ? kpi.ultimaHoraCarga : null,
                 objetivoDiario: kpi && kpi.objetivoPedidos ? Math.round(kpi.objetivoPedidos / 6) : 0
               };
             });
@@ -97,7 +96,7 @@ export class ApiService {
     );
   }
 
-  // NUEVOS MÉTODOS PARA CREACIÓN Y REGISTRO
+  // NUEVOS MÃ‰TODOS PARA CREACIÃ“N Y REGISTRO
 
   crearEmpleado(empleado: any, fotoArchivo?: File): Observable<any> {
     const formData = new FormData();
@@ -116,7 +115,7 @@ export class ApiService {
     return this.http.post<Productividad>(`${this.baseUrl}/productividad`, productividad);
   }
 
-  // MÉTODOS PARA OBJETIVOS (Asignación de Pedidos)
+  // MÃ‰TODOS PARA OBJETIVOS (AsignaciÃ³n de Pedidos)
 
   obtenerObjetivos(empleadoId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/objetivos/empleado/${empleadoId}`);
@@ -182,8 +181,6 @@ export class ApiService {
       catchError(err => {
         console.warn(` [ApiService] Mocking productividad para empleado ${empleadoId}`);
         return of([
-          { fecha: '2026-07-07', bultosPreparados: 120, pedidosPreparados: 10, pedidosEncargados: 12, pedidosPendientes: 2 },
-          { fecha: '2026-07-08', bultosPreparados: 150, pedidosPreparados: 15, pedidosEncargados: 15, pedidosPendientes: 0 }
         ]);
       })
     );
@@ -201,7 +198,6 @@ export class ApiService {
     return this.http.get<any>(`${this.baseUrl}/productividad/kpi/${empleadoId}`).pipe(
       catchError(err => {
         console.warn(` [ApiService] Mocking KPI para empleado ${empleadoId}`);
-        return of({ totalBultos: 270, totalPedidos: 25, totalPendientes: 2, eficiencia: 92 });
       })
     );
   }
@@ -287,7 +283,7 @@ export class ApiService {
   getPendientesRevision(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/attendance/pendientes`).pipe(
       catchError(err => {
-        console.warn(' [ApiService] Mocking fichajes pendientes de revisión');
+        console.warn(' [ApiService] Mocking fichajes pendientes de revisiÃ³n');
         return of([
           { id: 101, employeeId: 2, clockInAt: new Date().toISOString(), similitudFacial: 0.72, estadoVerificacion: 'PENDIENTE_REVISION' }
         ]);
@@ -318,12 +314,12 @@ export class ApiService {
 
   revisarFichaje(id: number, aprobado: boolean): Observable<any> {
     if (id === 101) {
-      console.warn(' [ApiService] Interceptando revisión para ID simulado 101');
+      console.warn(' [ApiService] Interceptando revisiÃ³n para ID simulado 101');
       return of({ success: true, id, aprobado });
     }
     return this.http.post<any>(`${this.baseUrl}/attendance/${id}/revisar`, { aprobado }).pipe(
       catchError(err => {
-        console.warn(' [ApiService] Falló la revisión real en el servidor. Simulando éxito local.');
+        console.warn(' [ApiService] FallÃ³ la revisiÃ³n real en el servidor. Simulando Ã©xito local.');
         return of({ success: true, id, aprobado });
       })
     );
@@ -351,4 +347,17 @@ export class ApiService {
   deleteWorkSchedule(id: number): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/work-schedules/${id}`);
   }
+
+  // ==========================
+  // PLANTILLAS DE HORAS
+  // ==========================
+  getPlantillaHoras(empleadoId: number, fecha: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/plantillas-horas/empleado/${empleadoId}/fecha/${fecha}`);
+  }
+
+  savePlantillaHoras(plantilla: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/plantillas-horas`, plantilla);
+  }
 }
+
+

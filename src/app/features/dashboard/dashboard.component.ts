@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+﻿import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -9,12 +9,13 @@ import { EmployeePerformance } from '../../core/models/employee.model';
 import { EmployeeTableComponent } from './employee-table/employee-table.component';
 import { EmployeeDetailComponent } from './components/employee-detail/employee-detail.component'; 
 import { PerfilComponent } from './components/perfil/perfil.component';
+import { CargaHoras } from '../carga-horas/carga-horas';
 import { NgApexchartsModule } from 'ng-apexcharts';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, EmployeeTableComponent, EmployeeDetailComponent, PerfilComponent, NgApexchartsModule, FormsModule], 
+  imports: [CommonModule, EmployeeTableComponent, EmployeeDetailComponent, PerfilComponent, NgApexchartsModule, FormsModule, CargaHoras], 
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
@@ -24,11 +25,11 @@ export class DashboardComponent implements OnInit {
   // Variable de control para saber si vemos la lista o el detalle individual
   empleadoSeleccionado: EmployeePerformance | null = null;
 
-  // Propiedades de búsqueda y filtrado de tabla
+  // Propiedades de bÃƒÂºsqueda y filtrado de tabla
   filtroBusqueda: string = '';
   filteredEmployees: EmployeePerformance[] = [];
 
-  // Propiedades de gráficos globales
+  // Propiedades de grÃƒÂ¡ficos globales
   public barChartOptions: any;
   public donutChartOptions: any;
   statsCards: any[] = [];
@@ -39,7 +40,7 @@ export class DashboardComponent implements OnInit {
   empleadosActivos = 0;
   productividadHistorica: any[] = [];
   
-  // Variables para Revisión Facial (Admin/Supervisor)
+  // Variables para RevisiÃƒÂ³n Facial (Admin/Supervisor)
   fichajesPendientes: any[] = [];
   salidasAnticipadasDeHoy: any[] = [];
   mostrarModalRevision = false;
@@ -49,7 +50,7 @@ export class DashboardComponent implements OnInit {
   revisando = false;
   isAdminUser = false;
 
-  // Reporte Histórico de Salidas Anticipadas (Admin/Supervisor)
+  // Reporte HistÃƒÂ³rico de Salidas Anticipadas (Admin/Supervisor)
   mostrarReporteSalidas = false;
   reporteSalidasHistorico: any[] = [];
   reporteSalidasFiltrado: any[] = [];
@@ -57,11 +58,11 @@ export class DashboardComponent implements OnInit {
   fechaInicioReporte = '';
   fechaFinReporte = '';
 
-  // Navegación Sidebar
+  // NavegaciÃƒÂ³n Sidebar
   seccionActiva = 'resumen';
   objetivosIncumplidosHoy: any[] = [];
 
-  // Alerta y Confirmación Personalizada
+  // Alerta y ConfirmaciÃƒÂ³n Personalizada
   customAlert = {
     mostrar: false,
     titulo: '',
@@ -83,11 +84,11 @@ export class DashboardComponent implements OnInit {
     role: 'EMPLEADO',
     puesto: '',
     sector: '',
-    turno: 'Mañana',
+    turno: 'MaÃƒÂ±ana',
     active: true
   };
 
-  // Información del usuario logueado
+  // InformaciÃƒÂ³n del usuario logueado
   usuarioActual: { name: string; role: string; isAdmin: boolean } | null = null;
   miPropioEmpleado: EmployeePerformance | null = null;
 
@@ -121,6 +122,13 @@ export class DashboardComponent implements OnInit {
       this.loading = true;
       this.apiService.getEmployeeData().subscribe({
         next: (data) => {
+          // Ordenar data descendentemente por ultimaHoraCarga
+          data.sort((a, b) => {
+            if (!a.ultimaHoraCarga && !b.ultimaHoraCarga) return 0;
+            if (!a.ultimaHoraCarga) return 1;
+            if (!b.ultimaHoraCarga) return -1;
+            return new Date(b.ultimaHoraCarga).getTime() - new Date(a.ultimaHoraCarga).getTime();
+          });
           this.employees = data;
           
           // Siempre buscamos si el usuario logueado tiene un perfil de empleado asociado
@@ -131,7 +139,7 @@ export class DashboardComponent implements OnInit {
 
           if (this.authService.isEmployee()) {
             if (!found) {
-              console.warn('No se encontraron los datos unificados. Se usará modo limitado.');
+              console.warn('No se encontraron los datos unificados. Se usarÃƒÂ¡ modo limitado.');
               this.usuarioActual!.role = 'EMPLEADO';
             } else if (found.puesto === 'SUPERVISOR') {
               this.usuarioActual!.role = 'SUPERVISOR';
@@ -179,27 +187,33 @@ export class DashboardComponent implements OnInit {
   cargarDatos(): void {
     this.loading = true;
     this.apiService.getEmployeeData().subscribe({
-      next: (data) => {
-        this.employees = data;
-        this.filteredEmployees = data;
+        next: (data) => {
+          data.sort((a, b) => {
+            if (!a.ultimaHoraCarga && !b.ultimaHoraCarga) return 0;
+            if (!a.ultimaHoraCarga) return 1;
+            if (!b.ultimaHoraCarga) return -1;
+            return new Date(b.ultimaHoraCarga).getTime() - new Date(a.ultimaHoraCarga).getTime();
+          });
+          this.employees = data;
+          this.filteredEmployees = data;
         this.loading = false;
         this.filtrarEmpleados();
         this.initCharts();
         this.cargarSalidasAnticipadas();
         this.cargarObjetivosIncumplidos();
         this.cargarReporteSalidasHistorico();
-        this.cdr.detectChanges(); // Forzar detección de cambios para ocultar pantalla de carga
+        this.cdr.detectChanges(); // Forzar detecciÃƒÂ³n de cambios para ocultar pantalla de carga
       },
       error: (err) => {
-        console.error('Error al cargar la información', err);
+        console.error('Error al cargar la informaciÃƒÂ³n', err);
         this.loading = false;
-        this.cdr.detectChanges(); // Forzar detección de cambios ante errores
+        this.cdr.detectChanges(); // Forzar detecciÃƒÂ³n de cambios ante errores
       }
     });
   }
 
   // ============================================
-  // REVISIÓN FACIAL (ADMIN/SUPERVISOR)
+  // REVISIÃƒâ€œN FACIAL (ADMIN/SUPERVISOR)
   // ============================================
 
   cargarFichajesPendientes(): void {
@@ -218,7 +232,7 @@ export class DashboardComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error al cargar fichajes pendientes de revisión:', err);
+        console.error('Error al cargar fichajes pendientes de revisiÃƒÂ³n:', err);
       }
     });
   }
@@ -244,7 +258,7 @@ export class DashboardComponent implements OnInit {
           return this.esSalidaAnticipada(r);
         });
 
-        // 2. Agrupar por empleado y tomar solo la última salida anticipada de hoy
+        // 2. Agrupar por empleado y tomar solo la ÃƒÂºltima salida anticipada de hoy
         const ultimasSalidasAnticipadasPorEmpleado: Record<number, any> = {};
         salidasAnticipadas.forEach(sa => {
           const empId = sa.employeeId;
@@ -254,7 +268,7 @@ export class DashboardComponent implements OnInit {
           }
         });
 
-        // 3. Para cada última salida anticipada, verificar si hay un fichaje posterior aceptado
+        // 3. Para cada ÃƒÂºltima salida anticipada, verificar si hay un fichaje posterior aceptado
         this.salidasAnticipadasDeHoy = Object.values(ultimasSalidasAnticipadasPorEmpleado).filter(sa => {
           const empId = sa.employeeId;
           const horaSa = new Date(sa.clockInAt); // Usamos clockInAt del fichaje anterior como referencia de tiempo
@@ -317,7 +331,7 @@ export class DashboardComponent implements OnInit {
           
           let horaFinStr = '14:00';
           if (emp) {
-            const shiftStr = emp.shift || 'Mañana';
+            const shiftStr = emp.shift || 'MaÃƒÂ±ana';
             if (shiftStr.toLowerCase().includes('tarde')) {
               horaFinStr = '22:00';
             } else if (shiftStr.toLowerCase().includes('noche')) {
@@ -362,7 +376,7 @@ export class DashboardComponent implements OnInit {
   }
 
   abrirModalRevision(): void {
-    // Asegurar que los fichajes pendientes estén enriquecidos antes de abrir
+    // Asegurar que los fichajes pendientes estÃƒÂ©n enriquecidos antes de abrir
     this.cargarFichajesPendientes();
     this.mostrarModalRevision = true;
     this.fichajeSeleccionado = null;
@@ -403,7 +417,7 @@ export class DashboardComponent implements OnInit {
     const emp = this.employees.find(e => e.id === empIdStr);
     if (!emp) return false;
 
-    const shiftStr = emp.shift || 'Mañana';
+    const shiftStr = emp.shift || 'MaÃƒÂ±ana';
     let endHour = 14;
     let endMin = 0;
     if (shiftStr.toLowerCase().includes('tarde')) {
@@ -439,16 +453,16 @@ export class DashboardComponent implements OnInit {
     console.log("procesarFichaje click!", aprobado, this.fichajeSeleccionado);
     if (this.revisando) return;
     if (!this.fichajeSeleccionado) {
-      this.mostrarAlerta("Atención", "No hay ningún fichaje seleccionado para procesar.", "warning");
+      this.mostrarAlerta("AtenciÃƒÂ³n", "No hay ningÃƒÂºn fichaje seleccionado para procesar.", "warning");
       return;
     }
     
     this.revisando = true;
     const id = this.fichajeSeleccionado.id;
-    console.log("Enviando revisión a API para id:", id);
+    console.log("Enviando revisiÃƒÂ³n a API para id:", id);
     this.apiService.revisarFichaje(id, aprobado).subscribe({
       next: (res) => {
-        console.log("Revisión completada con éxito en API:", res);
+        console.log("RevisiÃƒÂ³n completada con ÃƒÂ©xito en API:", res);
         this.revisando = false;
         
         // Quitar de la lista local de inmediato
@@ -460,19 +474,19 @@ export class DashboardComponent implements OnInit {
         } else {
           this.cerrarModalRevision();
         }
-        this.cargarDatos(); // Recargar datos del dashboard por si cambió la asistencia
+        this.cargarDatos(); // Recargar datos del dashboard por si cambiÃƒÂ³ la asistencia
       },
       error: (err) => {
-        console.error('Error al procesar la revisión de fichaje:', err);
+        console.error('Error al procesar la revisiÃƒÂ³n de fichaje:', err);
         const errorMsg = err.error?.message || err.message || 'Error desconocido';
-        this.mostrarAlerta("Error al procesar", "No se pudo procesar la decisión: " + errorMsg, "error");
+        this.mostrarAlerta("Error al procesar", "No se pudo procesar la decisiÃƒÂ³n: " + errorMsg, "error");
         this.revisando = false;
       }
     });
   }
 
   // ============================================
-  // CREACIÓN DE EMPLEADOS (SUPERADMIN)
+  // CREACIÃƒâ€œN DE EMPLEADOS (SUPERADMIN)
   // ============================================
 
   abrirModalCrearEmpleado(): void {
@@ -487,7 +501,7 @@ export class DashboardComponent implements OnInit {
       role: 'EMPLEADO',
       puesto: '',
       sector: '',
-      turno: 'Mañana',
+      turno: 'MaÃƒÂ±ana',
       active: true
     };
     this.fotoSeleccionada = null;
@@ -510,7 +524,7 @@ export class DashboardComponent implements OnInit {
 
   guardarNuevoEmpleado(): void {
     if (!this.nuevoEmpleado.nombre || !this.nuevoEmpleado.email || !this.nuevoEmpleado.passwordHash) {
-      alert('Por favor completa los campos obligatorios (Nombre, Email, Contraseña).');
+      alert('Por favor completa los campos obligatorios (Nombre, Email, ContraseÃƒÂ±a).');
       return;
     }
 
@@ -519,13 +533,13 @@ export class DashboardComponent implements OnInit {
       next: () => {
         this.creandoEmpleado = false;
         this.cerrarModalCrearEmpleado();
-        alert('¡Empleado creado exitosamente!');
+        alert('Ã‚Â¡Empleado creado exitosamente!');
         this.cargarDatos(); // Refrescar la tabla
       },
       error: (err) => {
         this.creandoEmpleado = false;
         console.error('Error al crear empleado:', err);
-        alert('Error al crear el empleado. Verifica los datos o el correo (podría estar duplicado).');
+        alert('Error al crear el empleado. Verifica los datos o el correo (podrÃƒÂ­a estar duplicado).');
       }
     });
   }
@@ -545,14 +559,14 @@ export class DashboardComponent implements OnInit {
   }
 
   initCharts(): void {
-    // 1. Gráfico de Barras: Comparación de Bultos
+    // 1. GrÃƒÂ¡fico de Barras: ComparaciÃƒÂ³n de Bultos
     const names = this.employees.map(emp => emp.name);
-    const units = this.employees.map(emp => emp.totalBultos || 0);
+    const units = this.employees.map(emp => emp.totalPedidos || 0);
 
     this.barChartOptions = {
       series: [
         {
-          name: "Bultos Procesados",
+          name: "Pedidos Preparados",
           data: units
         }
       ],
@@ -577,7 +591,7 @@ export class DashboardComponent implements OnInit {
         }
       },
       yaxis: {
-        title: { text: "Unidades (Bultos)" },
+        title: { text: "Pedidos" },
         labels: {
           style: { colors: "#64748b" }
         }
@@ -587,21 +601,21 @@ export class DashboardComponent implements OnInit {
       }
     };
 
-    // 2. Gráfico de Torta / Donut: Distribución por Turno
-    const turnosCount: { [key: string]: number } = { 'Mañana': 0, 'Tarde': 0, 'Noche': 0 };
+    // 2. GrÃƒÂ¡fico de Torta / Donut: DistribuciÃƒÂ³n por Turno
+    const turnosCount: { [key: string]: number } = { 'MaÃƒÂ±ana': 0, 'Tarde': 0, 'Noche': 0 };
     this.employees.forEach(emp => {
-      const turnoStr = emp.shift.includes('Mañana') || emp.shift.includes('Maana') ? 'Mañana' : 
+      const turnoStr = emp.shift.includes('MaÃƒÂ±ana') || emp.shift.includes('Maana') ? 'MaÃƒÂ±ana' : 
                       emp.shift.includes('Tarde') ? 'Tarde' : 'Noche';
       turnosCount[turnoStr] = (turnosCount[turnoStr] || 0) + 1;
     });
 
     this.donutChartOptions = {
-      series: [turnosCount['Mañana'], turnosCount['Tarde'], turnosCount['Noche']],
+      series: [turnosCount['MaÃƒÂ±ana'], turnosCount['Tarde'], turnosCount['Noche']],
       chart: {
         type: "donut",
         height: 320
       },
-      labels: ["Turno Mañana", "Turno Tarde", "Turno Noche"],
+      labels: ["Turno MaÃƒÂ±ana", "Turno Tarde", "Turno Noche"],
       colors: ["#3b82f6", "#8b5cf6", "#f59e0b"],
       legend: {
         position: "bottom",
@@ -632,25 +646,25 @@ export class DashboardComponent implements OnInit {
     return this.employees.reduce((acc, emp) => acc + (emp.totalPedidos || 0), 0);
   }
 
-  getTotalBultos(): number {
-    return this.employees.reduce((acc, emp) => acc + (emp.totalBultos || 0), 0);
+  gettotalPedidos(): number {
+    return this.employees.reduce((acc, emp) => acc + (emp.totalPedidos || 0), 0);
   }
 
   getTotalPendientes(): number {
     return this.employees.reduce((acc, emp) => acc + (emp.totalPendientes || 0), 0);
   }
 
-  getMejorDesempeno(): { nombre: string; bultos: number } | null {
+  getMejorDesempeno(): { nombre: string; pedidos: number } | null {
     if (this.employees.length === 0) return null;
     let best = this.employees[0];
     for (const emp of this.employees) {
-      if ((emp.totalBultos || 0) > (best.totalBultos || 0)) {
+      if ((emp.totalPedidos || 0) > (best.totalPedidos || 0)) {
         best = emp;
       }
     }
     return {
       nombre: best.name,
-      bultos: best.totalBultos || 0
+      pedidos: best.totalPedidos || 0
     };
   }
 
@@ -696,13 +710,13 @@ export class DashboardComponent implements OnInit {
     }
     switch (this.seccionActiva) {
       case 'resumen':
-        return 'Panel General: Resumen y Gráficos';
+        return 'Panel General: Resumen y GrÃƒÂ¡ficos';
       case 'tabla':
-        return 'Tabla de Personal y Asignación';
+        return 'Tabla de Personal y AsignaciÃƒÂ³n';
       case 'pendientes':
-        return 'Control de Fichajes Pendientes de Validación';
+        return 'Control de Fichajes Pendientes de ValidaciÃƒÂ³n';
       case 'salidas':
-        return 'Registro Histórico de Salidas Anticipadas';
+        return 'Registro HistÃƒÂ³rico de Salidas Anticipadas';
       case 'incumplidos':
         return 'Control de Objetivos Incumplidos Hoy';
       case 'perfil':
@@ -732,11 +746,11 @@ export class DashboardComponent implements OnInit {
           next: (prodRecords) => {
             const incumplidos: any[] = [];
 
-            // Agrupar fichajes por empleado para saber quién salió hoy
+            // Agrupar fichajes por empleado para saber quiÃƒÂ©n saliÃƒÂ³ hoy
             const empleadosSalidos = new Set<number>();
             salidasHoy.forEach(s => empleadosSalidos.add(s.employeeId));
 
-            // Para cada empleado que salió hoy, verificar su productividad contra su objetivo
+            // Para cada empleado que saliÃƒÂ³ hoy, verificar su productividad contra su objetivo
             this.employees.forEach(emp => {
               const numericId = parseInt(emp.id.replace('EMP-', ''), 10);
               if (empleadosSalidos.has(numericId)) {
@@ -786,7 +800,7 @@ export class DashboardComponent implements OnInit {
           
           let horaFinStr = '14:00';
           if (emp) {
-            const shiftStr = emp.shift || 'Mañana';
+            const shiftStr = emp.shift || 'MaÃƒÂ±ana';
             if (shiftStr.toLowerCase().includes('tarde')) {
               horaFinStr = '22:00';
             } else if (shiftStr.toLowerCase().includes('noche')) {
@@ -802,7 +816,7 @@ export class DashboardComponent implements OnInit {
           };
         }).sort((a, b) => new Date(b.clockOutAt).getTime() - new Date(a.clockOutAt).getTime());
         
-        // Inicializar fechas si están vacías
+        // Inicializar fechas si estÃƒÂ¡n vacÃƒÂ­as
         if (!this.fechaInicioReporte || !this.fechaFinReporte) {
           const hoy = new Date();
           this.fechaFinReporte = this.getLocalStartDate(hoy);
@@ -814,8 +828,10 @@ export class DashboardComponent implements OnInit {
         this.filtrarReporteSalidas();
       },
       error: (err) => {
-        console.error('Error al cargar reporte de salidas histórico:', err);
+        console.error('Error al cargar reporte de salidas histÃƒÂ³rico:', err);
       }
     });
   }
 }
+
+

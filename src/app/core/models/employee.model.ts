@@ -1,9 +1,9 @@
-// Para el Dashboard/Tabla
+﻿// Para el Dashboard/Tabla
 export interface EmployeePerformance {
   id: string;          // EMP-001
-  name: string;        // Martín Gómez
+  name: string;        // MartÃ­n GÃ³mez
   role: string;        // Operario de Picking
-  shift: string;       // Mañana (06-14h)
+  shift: string;       // MaÃ±ana (06-14h)
   workingDays?: number;
   unitsProcessed?: number;
   errors?: number;
@@ -12,12 +12,11 @@ export interface EmployeePerformance {
   
   // Nuevos campos del backend
   totalPedidos?: number;
-  totalBultos?: number;
+  ultimaHoraCarga?: string;
   totalPendientes?: number;
   
-  // Campos de KPIs específicos del backend
+  // Campos de KPIs especÃ­ficos del backend
   pedidosPorHora?: number;
-  bultosPorHora?: number;
   promedioPedidosPorJornada?: number;
   objetivoDiario?: number;
   porcentajeCumplimiento?: number;
@@ -35,7 +34,7 @@ export interface SystemInfo {
 
 // Estructura requerida para CREAR o recibir un Empleado
 export interface Empleado {
-  id?: number; // O string, según maneje tu base de datos
+  id?: number; // O string, segÃºn maneje tu base de datos
   nombre: string;
   apellido: string;
   sector: string;
@@ -52,8 +51,9 @@ export interface Empleado {
 export interface Productividad {
   id?: number;
   fecha: string;            // Ejemplo: "2026-07-03"
-  bultosPreparados: number; // Mapea a las unidades/bultos del operario
-  empleado: number;         // ID del empleado (Relación)
+  empleado: number;         // ID del empleado (RelaciÃ³n)
   pedidosEncargados: number;
   pedidosPreparados: number;
 }
+
+

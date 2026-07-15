@@ -1,6 +1,6 @@
 <div style="display: flex; min-height: 100vh; background-color: #f8fafc; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; width: 100%;">
   
-  <!-- MENÚ LATERAL (SIDEBAR) -->
+  <!-- MENÃš LATERAL (SIDEBAR) -->
   <div style="width: 260px; background-color: #0f172a; color: #94a3b8; display: flex; flex-direction: column; border-right: 1px solid #1e293b; position: sticky; top: 0; height: 100vh; z-index: 100; flex-shrink: 0;">
     <!-- Brand Name -->
     <div style="padding: 24px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 10px;">
@@ -19,7 +19,7 @@
     <!-- Menu Links -->
     <div style="padding: 16px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; overflow-y: auto;">
       
-      <!-- SECCIÓN DE ADMINISTRACIÓN / SUPERVISIÓN -->
+      <!-- SECCIÃ“N DE ADMINISTRACIÃ“N / SUPERVISIÃ“N -->
       <ng-container *ngIf="usuarioActual?.role !== 'EMPLEADO'">
         
         <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR'" (click)="cambiarSeccion('resumen')" 
@@ -27,7 +27,7 @@
                 [style.color]="(seccionActiva === 'resumen' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
                 style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; width: 100%;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
-          Resumen y Gráficos
+          Resumen y GrÃ¡ficos
         </button>
         
         <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR' || usuarioActual?.role === 'SUPERADMIN'" (click)="cambiarSeccion('tabla')" 
@@ -47,6 +47,14 @@
             <span>Fichajes Pendientes</span>
           </div>
           <span *ngIf="fichajesPendientes.length > 0" style="background-color: #f59e0b; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">{{ fichajesPendientes.length }}</span>
+        </button>
+
+        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERADMIN'" (click)="cambiarSeccion('carga-horas')" 
+                [style.background-color]="(seccionActiva === 'carga-horas' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
+                [style.color]="(seccionActiva === 'carga-horas' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
+                style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; width: 100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Carga de Horas
         </button>
         
         <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR'" (click)="cambiarSeccion('salidas')" 
@@ -81,7 +89,7 @@
         
       </ng-container>
       
-      <!-- SECCIÓN DE EMPLEADO (También accesible para Supervisor para que pueda fichar) -->
+      <!-- SECCIÃ“N DE EMPLEADO (TambiÃ©n accesible para Supervisor para que pueda fichar) -->
       <ng-container *ngIf="usuarioActual?.role === 'EMPLEADO' || usuarioActual?.role === 'SUPERVISOR'">
         <button (click)="verMiResumen()"
                 [style.background-color]="empleadoSeleccionado?.id === miPropioEmpleado?.id ? '#1e293b' : 'transparent'"
@@ -110,7 +118,7 @@
               style="background: transparent; border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; width: 100%; padding: 10px; border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;"
               onmouseover="this.style.background='rgba(239, 68, 68, 0.08)'" onmouseout="this.style.background='transparent'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-        Cerrar Sesión
+        Cerrar SesiÃ³n
       </button>
     </div>
     
@@ -130,7 +138,7 @@
         <!-- System Status indicator -->
         <div style="display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 6px 14px; border-radius: 20px; border: 1px solid #e2e8f0;">
           <span style="width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);"></span>
-          <span style="font-size: 13px; font-weight: 600; color: #475569;">Sistema En Línea</span>
+          <span style="font-size: 13px; font-weight: 600; color: #475569;">Sistema En LÃ­nea</span>
         </div>
       </div>
     </div>
@@ -141,7 +149,7 @@
       <!-- Loading State -->
       <div class="loading-state" *ngIf="loading" style="text-align: center; padding: 60px 20px; color: #64748b;">
         <div class="spinner" style="margin: 0 auto 12px; width: 32px; height: 32px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin .8s linear infinite;"></div>
-        <p>Cargando información...</p>
+        <p>Cargando informaciÃ³n...</p>
       </div>
 
       <ng-container *ngIf="!loading">
@@ -157,17 +165,17 @@
         <!-- SECCIONES GENERALES DE ADMINISTRADOR -->
         <div *ngIf="!empleadoSeleccionado">
           
-          <!-- Banners de Advertencia en cabecera de la sección activa (Solo Administradores y Supervisores) -->
+          <!-- Banners de Advertencia en cabecera de la secciÃ³n activa (Solo Administradores y Supervisores) -->
           <ng-container *ngIf="usuarioActual?.isAdmin && usuarioActual?.role !== 'SUPERADMIN'">
             
-            <!-- BANNER DE REVISIÓN FACIAL -->
+            <!-- BANNER DE REVISIÃ“N FACIAL -->
             <div *ngIf="fichajesPendientes.length > 0 && seccionActiva !== 'pendientes'"
                  style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
               <div style="display: flex; align-items: center; gap: 12px;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 <div>
-                  <h4 style="margin: 0; color: #b45309; font-size: 15px; font-weight: 700;">Fichajes Pendientes de Revisión</h4>
-                  <p style="margin: 4px 0 0 0; color: #78350f; font-size: 14px;">Hay <strong>{{ fichajesPendientes.length }}</strong> fichaje(s) que requieren validación visual.</p>
+                  <h4 style="margin: 0; color: #b45309; font-size: 15px; font-weight: 700;">Fichajes Pendientes de RevisiÃ³n</h4>
+                  <p style="margin: 4px 0 0 0; color: #78350f; font-size: 14px;">Hay <strong>{{ fichajesPendientes.length }}</strong> fichaje(s) que requieren validaciÃ³n visual.</p>
                 </div>
               </div>
               <button (click)="cambiarSeccion('pendientes')"
@@ -190,7 +198,7 @@
                   <p style="margin: 4px 0 0 0; color: #7f1d1d; font-size: 14px;">
                     Los siguientes empleados ficharon salida antes de finalizar su turno:
                     <span *ngFor="let s of salidasAnticipadasDeHoy; let last = last">
-                      <strong>{{ s.employeeName }}</strong> (salió a las {{ s.clockOutAt | date:'HH:mm' }}hs){{ !last ? ', ' : '' }}
+                      <strong>{{ s.employeeName }}</strong> (saliÃ³ a las {{ s.clockOutAt | date:'HH:mm' }}hs){{ !last ? ', ' : '' }}
                     </span>
                   </p>
                 </div>
@@ -225,7 +233,7 @@
             
           </ng-container>
           
-          <!-- TAB 1: RESUMEN Y GRÁFICOS -->
+          <!-- TAB 1: RESUMEN Y GRÃ FICOS -->
           <div *ngIf="seccionActiva === 'resumen'">
             <!-- KPI Summary Cards -->
             <div class="kpi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
@@ -242,9 +250,9 @@
               </div>
 
               <div class="kpi-card kpi-card--amber" style="background: white; padding: 18px 20px; border-radius: 10px; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b; transition: all 0.15s;">
-                <div class="kpi-label" style="font-size: 12.5px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: .03em;">Bultos Procesados</div>
-                <div class="kpi-value" style="font-size: 28px; font-weight: 700; color: #0f172a; margin-top: 6px; line-height: 1.1;">{{ getTotalBultos() | number }}</div>
-                <div class="kpi-footnote" style="font-size: 12px; color: #64748b; margin-top: 6px; font-weight: 500;">Total acumulado</div>
+                <div class="kpi-label" style="font-size: 12.5px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: .03em;">Salidas Anticipadas Hoy</div>
+                <div class="kpi-value" style="font-size: 28px; font-weight: 700; color: #0f172a; margin-top: 6px; line-height: 1.1;">{{ salidasAnticipadasDeHoy.length | number }}</div>
+                <div class="kpi-footnote" style="font-size: 12px; color: #64748b; margin-top: 6px; font-weight: 500;">En el día de hoy</div>
               </div>
 
               <div class="kpi-card kpi-card--green" style="background: white; padding: 18px 20px; border-radius: 10px; border: 1px solid #e2e8f0; border-left: 4px solid #10b981; transition: all 0.15s;">
@@ -256,9 +264,9 @@
             
             <!-- Charts Section -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
-              <!-- Comparativa de Bultos (Bar Chart) -->
+              <!-- Comparativa de Pedidos (Bar Chart) -->
               <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-                <h3 style="margin: 0 0 16px 0; font-size: 15px; color: #1e293b; font-weight: 600;">Comparación de Bultos Procesados por Operario</h3>
+                <h3 style="margin: 0 0 16px 0; font-size: 15px; color: #1e293b; font-weight: 600;">ComparaciÃ³n de Salidas Anticipadas Hoy por Operario</h3>
                 <apx-chart *ngIf="barChartOptions"
                   [series]="barChartOptions.series"
                   [chart]="barChartOptions.chart"
@@ -271,9 +279,9 @@
                 </apx-chart>
               </div>
 
-              <!-- Distribución de Turno (Pie/Donut Chart) -->
+              <!-- DistribuciÃ³n de Turno (Pie/Donut Chart) -->
               <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-                <h3 style="margin: 0 0 16px 0; font-size: 15px; color: #1e293b; font-weight: 600;">Distribución de Personal por Turno</h3>
+                <h3 style="margin: 0 0 16px 0; font-size: 15px; color: #1e293b; font-weight: 600;">DistribuciÃ³n de Personal por Turno</h3>
                 <apx-chart *ngIf="donutChartOptions"
                   [series]="donutChartOptions.series"
                   [chart]="donutChartOptions.chart"
@@ -286,10 +294,10 @@
               </div>
             </div>
 
-            <!-- Tabla de Rendimiento Rápida en Panel de Gráficos -->
+            <!-- Tabla de Rendimiento RÃ¡pida en Panel de GrÃ¡ficos -->
             <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
               <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Resumen de Rendimiento Diario</h3>
-              <p style="margin: 0 0 20px 0; color: #64748b; font-size: 13.5px;">Acceso rápido a las métricas del día de hoy. Haz clic en un empleado para auditarlo detalladamente.</p>
+              <p style="margin: 0 0 20px 0; color: #64748b; font-size: 13.5px;">Acceso rÃ¡pido a las mÃ©tricas del dÃ­a de hoy. Haz clic en un empleado para auditarlo detalladamente.</p>
               
               <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
@@ -299,6 +307,7 @@
                       <th style="padding: 12px 16px;">Puesto (Rol)</th>
                       <th style="padding: 12px 16px;">Objetivo Diario</th>
                       <th style="padding: 12px 16px;">Pedidos Preparados</th>
+                      <th style="padding: 12px 16px;">Hora de Carga</th>
                       <th style="padding: 12px 16px;">Cumplimiento</th>
                     </tr>
                   </thead>
@@ -310,6 +319,7 @@
                       <td style="padding: 12px 16px; color: #64748b;">{{ emp.role }}</td>
                       <td style="padding: 12px 16px;">{{ emp.objetivoDiario }}</td>
                       <td style="padding: 12px 16px;">{{ emp.totalPedidos }}</td>
+                      <td style="padding: 12px 16px;">{{ emp.ultimaHoraCarga ? (emp.ultimaHoraCarga | date:'HH:mm' ) : '-' }}</td>
                       <td style="padding: 12px 16px;">
                         <span [style.background-color]="(emp.porcentajeCumplimiento || 0) >= 100 ? '#ecfdf5' : '#fff1f2'"
                               [style.color]="(emp.porcentajeCumplimiento || 0) >= 100 ? '#047857' : '#be123c'"
@@ -339,7 +349,7 @@
                              style="border: none; outline: none; background: transparent; font-size: 14px; color: #0f172a; width: 100%;" />
                     </div>
 
-                    <!-- BOTÓN NUEVO EMPLEADO (SOLO SUPERADMIN) -->
+                    <!-- BOTÃ“N NUEVO EMPLEADO (SOLO SUPERADMIN) -->
                     <button type="button" *ngIf="usuarioActual?.role === 'SUPERADMIN'" (click)="abrirModalCrearEmpleado()"
                             style="background-color: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; gap: 6px;">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -360,11 +370,11 @@
             </section>
           </div>
           
-          <!-- TAB 3: FICHAJES PENDIENTES DE REVISIÓN -->
+          <!-- TAB 3: FICHAJES PENDIENTES DE REVISIÃ“N -->
           <div *ngIf="seccionActiva === 'pendientes'">
             <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
               <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Validaciones de Identidad Pendientes</h3>
-              <p style="margin: 0 0 20px 0; color: #64748b; font-size: 13.5px;">El reconocimiento facial automático no pudo validar con total certeza la identidad de estos operarios en su fichaje de entrada. Por favor, realiza la revisión manual.</p>
+              <p style="margin: 0 0 20px 0; color: #64748b; font-size: 13.5px;">El reconocimiento facial automÃ¡tico no pudo validar con total certeza la identidad de estos operarios en su fichaje de entrada. Por favor, realiza la revisiÃ³n manual.</p>
               
               <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
@@ -373,7 +383,7 @@
                       <th style="padding: 12px 16px;">Empleado</th>
                       <th style="padding: 12px 16px;">DNI</th>
                       <th style="padding: 12px 16px;">Fecha y Hora de Fichaje</th>
-                      <th style="padding: 12px 16px;">Estado de Verificación</th>
+                      <th style="padding: 12px 16px;">Estado de VerificaciÃ³n</th>
                       <th style="padding: 12px 16px; text-align: right;">Acciones</th>
                     </tr>
                   </thead>
@@ -384,7 +394,7 @@
                       <td style="padding: 12px 16px;">{{ r.clockInAt | date:'dd/MM/yyyy HH:mm' }}hs</td>
                       <td style="padding: 12px 16px;">
                         <span style="background-color: #fef3c7; color: #d97706; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; text-transform: uppercase;">
-                          Pendiente Revisión
+                          Pendiente RevisiÃ³n
                         </span>
                       </td>
                       <td style="padding: 12px 16px; text-align: right;">
@@ -397,7 +407,7 @@
                     </tr>
                     <tr *ngIf="fichajesPendientes.length === 0">
                       <td colspan="5" style="padding: 32px; text-align: center; color: #64748b; font-style: italic;">
-                        No hay fichajes pendientes de revisión facial en este momento.
+                        No hay fichajes pendientes de revisiÃ³n facial en este momento.
                       </td>
                     </tr>
                   </tbody>
@@ -467,6 +477,11 @@
           <div *ngIf="seccionActiva === 'incumplidos'">
             <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 16px;">
               <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Faltas de Cumplimiento de Objetivo (Hoy)</h3>
+              <p style="margin: 0 0 12px 0; color: #64748b; font-size: 13.5px;">Listado de operarios que finalizaron y ficharon la salida de su jornada laboral el dÃ­a de hoy sin llegar a completar su objetivo diario asignado.</p>
+              
+              <!-- Tabla de Reporte -->
+              <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
               <p style="margin: 0 0 12px 0; color: #64748b; font-size: 13.5px;">Listado de operarios que finalizaron y ficharon la salida de su jornada laboral el día de hoy sin llegar a completar su objetivo diario asignado.</p>
               
               <!-- Tabla de Reporte -->
@@ -478,6 +493,7 @@
                       <th style="padding: 12px 16px;">DNI</th>
                       <th style="padding: 12px 16px;">Objetivo Diario</th>
                       <th style="padding: 12px 16px;">Pedidos Preparados</th>
+                      <th style="padding: 12px 16px;">Hora de Carga</th>
                       <th style="padding: 12px 16px;">Diferencia (Faltante)</th>
                       <th style="padding: 12px 16px;">Estado</th>
                     </tr>
@@ -488,6 +504,7 @@
                       <td style="padding: 12px 16px; color: #64748b;">{{ r.employeeDni }}</td>
                       <td style="padding: 12px 16px;">{{ r.objetivo }}</td>
                       <td style="padding: 12px 16px; font-weight: 600;">{{ r.preparados }}</td>
+                      <td style="padding: 12px 16px;">{{ r.ultimaHoraCarga | date:'HH:mm' }}</td>
                       <td style="padding: 12px 16px; font-weight: 700; color: #e11d48;">-{{ r.faltantes }} pedidos</td>
                       <td style="padding: 12px 16px;">
                         <span style="background-color: #fff1f2; color: #e11d48; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; text-transform: uppercase;">
@@ -505,10 +522,13 @@
               </div>
             </div>
           </div>
+
+          <!-- TAB 7: CARGA DE HORAS -->
+          <div *ngIf="seccionActiva === 'carga-horas'">
+             <app-carga-horas></app-carga-horas>
+          </div>
           
-        </div>
-        
-        <!-- TAB 6: MI PERFIL -->
+          <!-- TAB 6: MI PERFIL -->
         <div *ngIf="seccionActiva === 'perfil'">
           <app-perfil></app-perfil>
         </div>
@@ -539,7 +559,7 @@
         </div>
         <div>
           <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Apellido</label>
-          <input type="text" [(ngModel)]="nuevoEmpleado.apellido" placeholder="Ej. Pérez" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+          <input type="text" [(ngModel)]="nuevoEmpleado.apellido" placeholder="Ej. PÃ©rez" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
         </div>
         <div>
           <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">DNI</label>
@@ -550,8 +570,8 @@
           <input type="email" [(ngModel)]="nuevoEmpleado.email" placeholder="correo@empresa.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
         </div>
         <div>
-          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Contraseña *</label>
-          <input type="password" [(ngModel)]="nuevoEmpleado.passwordHash" placeholder="Mínimo 6 caracteres" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">ContraseÃ±a *</label>
+          <input type="password" [(ngModel)]="nuevoEmpleado.passwordHash" placeholder="MÃ­nimo 6 caracteres" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
         </div>
         <div>
           <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Rol en el Sistema *</label>
@@ -568,12 +588,12 @@
         </div>
         <div>
           <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Sector</label>
-          <input type="text" [(ngModel)]="nuevoEmpleado.sector" placeholder="Ej. Depósito 1" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+          <input type="text" [(ngModel)]="nuevoEmpleado.sector" placeholder="Ej. DepÃ³sito 1" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
         </div>
         <div>
           <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Turno</label>
           <select [(ngModel)]="nuevoEmpleado.turno" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; background-color: white;">
-            <option value="Mañana">Mañana</option>
+            <option value="MaÃ±ana">MaÃ±ana</option>
             <option value="Tarde">Tarde</option>
             <option value="Noche">Noche</option>
           </select>
@@ -595,14 +615,14 @@
   </div>
 </div>
 
-<!-- Modal de Revisión de Fichajes (Solo Admin/Supervisor) -->
+<!-- Modal de RevisiÃ³n de Fichajes (Solo Admin/Supervisor) -->
 <div class="modal-overlay" *ngIf="mostrarModalRevision" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); display: flex; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(4px);">
   <div class="modal-card" style="background: white; border-radius: 16px; width: 100%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
     <!-- Header -->
     <div style="padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
       <h3 style="margin: 0; font-size: 18px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
-        Revisión de Fichajes
+        RevisiÃ³n de Fichajes
       </h3>
       <button (click)="mostrarModalRevision = false" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer;">&times;</button>
     </div>
@@ -740,3 +760,6 @@
     </div>
   </div>
 </div>
+
+
+

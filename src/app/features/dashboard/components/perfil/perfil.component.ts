@@ -12,6 +12,7 @@ import { Empleado } from '../../../../core/models/employee.model';
 })
 export class PerfilComponent implements OnInit {
   perfil: Empleado | null = null;
+  plantillaHoras: any = null;
   loading: boolean = true;
   error: string | null = null;
 
@@ -27,12 +28,26 @@ export class PerfilComponent implements OnInit {
   cargarPerfil(): void {
     this.loading = true;
     this.error = null;
-    this.apiService.getMiPerfil().subscribe({
-      next: (data) => {
-        this.perfil = data;
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
+      this.apiService.getMiPerfil().subscribe({
+        next: (data) => {
+          this.perfil = data;
+          if (this.perfil && this.perfil.id) {
+            this.apiService.getPlantillaHoras(this.perfil.id, new Date().toISOString().split('T')[0]).subscribe({
+              next: (ph) => {
+                this.plantillaHoras = ph;
+                this.loading = false;
+                this.cdr.detectChanges();
+              },
+              error: () => {
+                this.loading = false;
+                this.cdr.detectChanges();
+              }
+            });
+          } else {
+            this.loading = false;
+            this.cdr.detectChanges();
+          }
+        },
       error: (err) => {
         console.error('Error cargando perfil', err);
         this.error = 'No se pudo cargar la información del perfil.';
