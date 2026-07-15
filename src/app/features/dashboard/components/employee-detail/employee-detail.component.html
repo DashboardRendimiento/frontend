@@ -1,0 +1,421 @@
+<div style="font-family: sans-serif; background-color: #f8fafc; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+
+  <!-- Encabezado con botón de Volver -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <button *ngIf="showBackButton" (click)="volver()"
+              style="background-color: white; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 6px;"
+              onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='white'">
+        ← Volver al Panel General
+      </button>
+      
+    </div>
+
+    <!-- Ficha rápida del Operario y Botón Acciones -->
+    <div style="display: flex; gap: 16px; align-items: center;" *ngIf="isEmployeeUser">
+      <button *ngIf="isEmployeeUser" (click)="abrirFormularioProductividad()"
+              style="background-color: #10b981; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: background-color 0.2s;"
+              onmouseover="this.style.backgroundColor='#059669'"
+              onmouseout="this.style.backgroundColor='#10b981'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        Registrar Productividad Diaria
+      </button>
+
+      <!-- Botón Fichar Entrada -->
+      <button *ngIf="!isClockedIn" (click)="registrarEntrada()"
+              style="background-color: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+        Fichar Entrada
+      </button>
+
+      <!-- Botón Fichar Salida -->
+      <button *ngIf="isClockedIn" (click)="registrarSalida()"
+              style="background-color: #ef4444; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Fichar Salida ({{ timerVal }})
+      </button>
+
+    </div>
+  </div>
+
+  <!-- BANNER NOTIFICACIÓN PRODUCTOS FALTANTES -->
+  <div *ngIf="isEmployeeUser && mostrarNotificacionFaltantes" style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 6px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+    <div>
+      <h4 style="margin: 0; color: #b91c1c; font-size: 15px;">Faltan completar productos</h4>
+      <p style="margin: 4px 0 0 0; color: #7f1d1d; font-size: 14px;">Tienes <strong>{{ pedidosFaltantes }}</strong> pedidos pendientes asignados para hoy. Por favor, regístralos cuando los completes.</p>
+    </div>
+  </div>
+
+  <!-- BANNER OBJETIVO NO CUMPLIDO (EMPLEADO Y YA FICHÓ SALIDA) -->
+  <div *ngIf="isEmployeeUser && mostrarNotificacionIncumplido" style="background-color: #fff1f2; border-left: 4px solid #f43f5e; padding: 16px; border-radius: 6px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <div>
+      <h4 style="margin: 0; color: #9f1239; font-size: 15px; font-weight: 700;">Objetivo Diario Incumplido</h4>
+      <p style="margin: 4px 0 0 0; color: #881337; font-size: 14px;">No lograste completar tu objetivo de pedidos asignados para hoy. Te faltaron registrar <strong>{{ pedidosFaltantes }}</strong> pedidos.</p>
+    </div>
+  </div>
+
+  <!-- PANEL ADMINISTRADOR: ASIGNAR PEDIDOS -->
+  <div *ngIf="isAdminUser" style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 24px; border-left: 4px solid #2563eb; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 200px;">
+      <h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 15px;">Asignar Pedidos (Solo Admin)</h4>
+      <p style="margin: 0 0 12px 0; color: #64748b; font-size: 13px;">Asigna la cantidad de pedidos esperados para este empleado hoy.</p>
+      <div style="display: flex; gap: 12px;">
+        <input type="number" [(ngModel)]="pedidosAAsignar" placeholder="Ej. 100" min="1"
+               style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; width: 120px;" />
+        <button (click)="asignarPedidosEncargados()" [disabled]="!pedidosAAsignar || asignandoPedidos"
+                style="background-color: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s;"
+                [style.opacity]="(!pedidosAAsignar || asignandoPedidos) ? '0.6' : '1'">
+          {{ asignandoPedidos ? 'Asignando...' : 'Asignar a ' + employee.name }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTRO DE RANGO DE FECHAS -->
+  <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      <span style="font-weight: 600; color: #1e293b; font-size: 14px;">Filtrar Período de Análisis</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 13px; color: #64748b; font-weight: 500;">Desde:</span>
+        <input type="date" [(ngModel)]="fechaInicio" (change)="aplicarFiltros()"
+               style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; font-size: 13.5px; outline: none; background: #f8fafc; font-family: inherit; font-weight: 500; transition: border-color 0.15s;" 
+               onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#cbd5e1'" />
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 13px; color: #64748b; font-weight: 500;">Hasta:</span>
+        <input type="date" [(ngModel)]="fechaFin" (change)="aplicarFiltros()"
+               style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; font-size: 13.5px; outline: none; background: #f8fafc; font-family: inherit; font-weight: 500; transition: border-color 0.15s;"
+               onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#cbd5e1'" />
+      </div>
+      <button (click)="restablecerFiltros()"
+              style="background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.2s;"
+              onmouseover="this.style.backgroundColor='#e2e8f0'" onmouseout="this.style.backgroundColor='#f1f5f9'">
+        Restablecer
+      </button>
+    </div>
+  </div>
+
+  <!-- SECCIÓN DE MÉTRICAS INDIVIDUALES -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <!-- Pedidos/Hora -->
+    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6;">
+      <div style="font-size: 13px; color: #64748b; font-weight: 600;">Pedidos por Hora</div>
+      <div style="font-size: 28px; font-weight: 700; color: #1e293b; margin-top: 4px;">
+        {{ (periodKpis.pedidosPorHora !== null ? periodKpis.pedidosPorHora : (employeeKpi?.pedidosPorHora || 0)) | number:'1.0-1' }}
+      </div>
+      <div style="font-size: 12px; margin-top: 4px; font-weight: 500;"
+           [style.color]="periodKpis.pedidosPorHora !== null ? '#2563eb' : '#3b82f6'">
+        {{ periodKpis.pedidosPorHora !== null ? ('En el período (' + (periodKpis.totalHoras | number:'1.0-1') + ' hs)') : 'Promedio General' }}
+      </div>
+    </div>
+
+    <!-- Bultos/Hora -->
+    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #8b5cf6;">
+      <div style="font-size: 13px; color: #64748b; font-weight: 600;">Bultos por Hora</div>
+      <div style="font-size: 28px; font-weight: 700; color: #8b5cf6; margin-top: 4px;">
+        {{ (periodKpis.bultosPorHora !== null ? periodKpis.bultosPorHora : (employeeKpi?.bultosPorHora || 0)) | number:'1.0-1' }}
+      </div>
+      <div style="font-size: 12px; margin-top: 4px; font-weight: 500;"
+           [style.color]="periodKpis.bultosPorHora !== null ? '#7c3aed' : '#8b5cf6'">
+        {{ periodKpis.bultosPorHora !== null ? ('En el período (' + (periodKpis.totalHoras | number:'1.0-1') + ' hs)') : 'Promedio General' }}
+      </div>
+    </div>
+
+    <!-- Promedio Pedidos Jornada -->
+    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #10b981;">
+      <div style="font-size: 13px; color: #64748b; font-weight: 600;">Pedidos / Jornada</div>
+      <div style="font-size: 28px; font-weight: 700; color: #10b981; margin-top: 4px;">
+        {{ (periodKpis.pedidosPorJornada !== null ? periodKpis.pedidosPorJornada : (employeeKpi?.promedioPedidosPorJornada || 0)) | number:'1.0-0' }}
+      </div>
+      <div style="font-size: 12px; margin-top: 4px; font-weight: 500;"
+           [style.color]="periodKpis.pedidosPorJornada !== null ? '#059669' : '#10b981'">
+        {{ periodKpis.pedidosPorJornada !== null ? ('En el período (' + periodKpis.totalJornadas + ' jornadas)') : 'Promedio General' }}
+      </div>
+    </div>
+    
+    <!-- Promedio Bultos Jornada -->
+    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b;">
+      <div style="font-size: 13px; color: #64748b; font-weight: 600;">Bultos / Jornada</div>
+      <div style="font-size: 28px; font-weight: 700; color: #f59e0b; margin-top: 4px;">
+        {{ (periodKpis.bultosPorJornada !== null ? periodKpis.bultosPorJornada : (employeeKpi?.promedioBultosPorJornada || 0)) | number:'1.0-0' }}
+      </div>
+      <div style="font-size: 12px; margin-top: 4px; font-weight: 500;"
+           [style.color]="periodKpis.bultosPorJornada !== null ? '#d97706' : '#f59e0b'">
+        {{ periodKpis.bultosPorJornada !== null ? ('En el período (' + periodKpis.totalJornadas + ' jornadas)') : 'Promedio General' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN DE GRÁFICOS INDIVIDUALES -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px; font-family: sans-serif;">
+    <!-- Rendimiento Diario (Bar Chart) -->
+    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+      <h4 style="margin: 0 0 16px 0; font-size: 14px; color: #1e293b; font-weight: 600;">Evolución de Bultos Preparados</h4>
+      <apx-chart *ngIf="dailyBultosChartOptions"
+        [series]="dailyBultosChartOptions.series"
+        [chart]="dailyBultosChartOptions.chart"
+        [xaxis]="dailyBultosChartOptions.xaxis"
+        [yaxis]="dailyBultosChartOptions.yaxis"
+        [colors]="dailyBultosChartOptions.colors"
+        [plotOptions]="dailyBultosChartOptions.plotOptions"
+        [dataLabels]="dailyBultosChartOptions.dataLabels"
+        [grid]="dailyBultosChartOptions.grid">
+      </apx-chart>
+    </div>
+
+    <!-- Eficacia Diaria (Line Chart) -->
+    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+      <h4 style="margin: 0 0 16px 0; font-size: 14px; color: #1e293b; font-weight: 600;">Eficacia de Operación Diaria (%)</h4>
+      <apx-chart *ngIf="dailyEfficiencyChartOptions"
+        [series]="dailyEfficiencyChartOptions.series"
+        [chart]="dailyEfficiencyChartOptions.chart"
+        [xaxis]="dailyEfficiencyChartOptions.xaxis"
+        [yaxis]="dailyEfficiencyChartOptions.yaxis"
+        [colors]="dailyEfficiencyChartOptions.colors"
+        [stroke]="dailyEfficiencyChartOptions.stroke"
+        [dataLabels]="dailyEfficiencyChartOptions.dataLabels"
+        [markers]="dailyEfficiencyChartOptions.markers"
+        [fill]="dailyEfficiencyChartOptions.fill"
+        [grid]="dailyEfficiencyChartOptions.grid">
+      </apx-chart>
+    </div>
+  </div>
+
+  <!-- TABLA DE HISTORIAL DIARIO REAL -->
+  <div style="background: white; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      Detalle de Planilla Diaria Registrada
+    </h3>
+
+    <!-- Empty state -->
+    <div *ngIf="filteredLogs.length === 0" style="text-align: center; padding: 40px; color: #64748b;">
+      <p style="margin: 0; font-weight: 500;">No se registraron planillas de productividad en este período.</p>
+      <p style="margin: 4px 0 0 0; font-size: 13px;">Prueba seleccionando otro rango de fechas o agregando una nueva planilla diaria.</p>
+    </div>
+
+    <!-- Table content -->
+    <div class="table-responsive" *ngIf="filteredLogs.length > 0" style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+        <thead style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600;">
+          <tr>
+            <th style="padding: 10px 12px;">Fecha</th>
+            <th style="padding: 10px 12px; text-align: right;">Bultos Preparados</th>
+            <th style="padding: 10px 12px; text-align: right;">Pedidos Encargados</th>
+            <th style="padding: 10px 12px; text-align: right;">Pedidos Preparados</th>
+            <th style="padding: 10px 12px; text-align: right;">Eficacia del Día</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of filteredLogs" style="border-bottom: 1px solid #f1f5f9; color: #334155;">
+            <td style="padding: 10px 12px; font-weight: 500;">{{ log.fecha | date:'dd/MM/yyyy' }}</td>
+            <td style="padding: 10px 12px; text-align: right;">{{ log.bultosPreparados | number }}</td>
+            <td style="padding: 10px 12px; text-align: right;">{{ log.pedidosEncargados }}</td>
+            <td style="padding: 10px 12px; text-align: right;">{{ log.pedidosPreparados }}</td>
+            <td style="padding: 10px 12px; text-align: right; font-weight: 600; color: #059669;">
+              {{ log.pedidosEncargados > 0 ? (log.pedidosPreparados / log.pedidosEncargados * 100 | number:'1.1-1') : (employee.efficiencyRate | number:'1.1-1') }}%
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal Formulario Nueva Productividad -->
+<div class="modal-overlay" *ngIf="mostrarFormularioProductividad" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+  <div class="modal-card" style="background: white; padding: 24px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto;">
+    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+      <h3 style="margin: 0; font-size: 18px; color: #1e293b;">Registrar Productividad Diaria</h3>
+      <button class="close-btn" (click)="cerrarFormularioProductividad()" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; height: 32px; width: 32px; border-radius: 4px;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='transparent'">&times;</button>
+    </div>
+
+    <form (ngSubmit)="guardarProductividad()" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+
+      <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="prodFecha" style="font-weight: 600; font-size: 13px; color: #475569;">Fecha <span class="required" style="color: #ef4444;">*</span></label>
+          <input type="date" id="prodFecha" name="prodFecha" [(ngModel)]="nuevaProductividad.fecha" required readonly
+                 style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; color: #64748b; background-color: #f1f5f9; cursor: not-allowed;" />
+        </div>
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="prodBultos" style="font-weight: 600; font-size: 13px; color: #475569;">Bultos Preparados</label>
+          <input type="number" id="prodBultos" name="prodBultos" [(ngModel)]="nuevaProductividad.bultosPreparados" placeholder="Ej. 800"
+                 style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; color: #334155;" />
+        </div>
+      </div>
+
+      <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="prodPedidosEnc" style="font-weight: 600; font-size: 13px; color: #475569;">Pedidos Encargados (Asignados) <span class="required" style="color: #ef4444;">*</span></label>
+          <input type="number" id="prodPedidosEnc" name="prodPedidosEnc" [(ngModel)]="nuevaProductividad.pedidosEncargados" required readonly
+                 style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; color: #64748b; background-color: #f1f5f9; cursor: not-allowed;" />
+          <span style="font-size: 11px; color: #64748b;">(Este valor lo asigna el Administrador)</span>
+        </div>
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="prodPedidosPrep" style="font-weight: 600; font-size: 13px; color: #475569;">Pedidos Preparados</label>
+          <input type="number" id="prodPedidosPrep" name="prodPedidosPrep" [(ngModel)]="nuevaProductividad.pedidosPreparados" placeholder="Ej. 98"
+                 style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; color: #334155;" />
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+        <button type="button" (click)="cerrarFormularioProductividad()"
+                style="background-color: #f1f5f9; color: #475569; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s;"
+                onmouseover="this.style.backgroundColor='#e2e8f0'"
+                onmouseout="this.style.backgroundColor='#f1f5f9'">Cancelar</button>
+        <button type="submit"
+                style="background-color: #10b981; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s;"
+                onmouseover="this.style.backgroundColor='#059669'"
+                onmouseout="this.style.backgroundColor='#10b981'">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal de Reconocimiento Facial (Fichaje de Entrada) -->
+<div class="modal-overlay" *ngIf="mostrarModalCamara" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 10000;">
+  <div class="modal-card" style="background: white; padding: 24px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+      <h3 style="margin: 0; font-size: 18px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        Reconocimiento Facial
+      </h3>
+      <button (click)="cerrarModalCamara()" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer;">&times;</button>
+    </div>
+
+    <!-- Contenedor del video en vivo -->
+    <div *ngIf="!fotoCapturadaUrl" style="background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 16px; aspect-ratio: 4/3; display: flex; justify-content: center; align-items: center;">
+      <video #videoElement autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+    </div>
+
+    <!-- Contenedor de la foto capturada -->
+    <div *ngIf="fotoCapturadaUrl" style="background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 16px; aspect-ratio: 4/3; display: flex; justify-content: center; align-items: center; position: relative;">
+      <img [src]="fotoCapturadaUrl" alt="Foto capturada" style="width: 100%; height: 100%; object-fit: cover;" />
+      <div style="position: absolute; top: 10px; right: 10px; background: rgba(16, 185, 129, 0.9); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">
+        Foto Capturada
+      </div>
+    </div>
+
+    <!-- Canvas oculto para procesar la imagen -->
+    <canvas #canvasElement style="display: none;"></canvas>
+
+    <!-- Botones de Acción -->
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+      
+      <div *ngIf="!fotoCapturadaUrl" style="display: flex; gap: 12px;">
+        <button (click)="capturarFoto()" style="flex: 1; background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px;">
+          📸 Capturar Foto
+        </button>
+      </div>
+
+      <div *ngIf="fotoCapturadaUrl" style="display: flex; gap: 12px;">
+        <button (click)="reintentarFoto()" [disabled]="capturandoFoto" style="flex: 1; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+          Reintentar
+        </button>
+        <button (click)="confirmarFichajeConFoto()" [disabled]="capturandoFoto" style="flex: 2; background-color: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px;">
+          {{ capturandoFoto ? 'Procesando...' : 'Fichar con Foto' }}
+        </button>
+      </div>
+
+      <!-- Fallback por si la cámara no funciona -->
+      <button (click)="ficharSinFoto()" [disabled]="capturandoFoto" style="background: none; border: none; color: #64748b; font-size: 13px; text-decoration: underline; cursor: pointer; padding: 8px;">
+        Continuar sin foto (Fallback)
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Alerta Personalizada (Custom Alert) -->
+<div class="custom-alert-overlay" *ngIf="customAlert.mostrar" 
+     style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 11000; animation: fadeIn 0.25s ease-out;">
+  <div class="custom-alert-card" 
+       style="background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 16px; padding: 24px; width: 90%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); text-align: center; transform: scale(1); transition: transform 0.2s; animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+    
+    <!-- Icon Container -->
+    <div style="margin: 0 auto 16px auto; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+      <!-- Success Icon -->
+      <svg *ngIf="customAlert.tipo === 'success'" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" style="background: #ecfdf5; padding: 8px; border-radius: 50%;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <!-- Error Icon -->
+      <svg *ngIf="customAlert.tipo === 'error'" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" style="background: #fef2f2; padding: 8px; border-radius: 50%;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      <!-- Warning Icon -->
+      <svg *ngIf="customAlert.tipo === 'warning'" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" style="background: #fffbeb; padding: 8px; border-radius: 50%;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      <!-- Info Icon -->
+      <svg *ngIf="customAlert.tipo === 'info'" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" style="background: #eff6ff; padding: 8px; border-radius: 50%;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+    </div>
+
+    <!-- Title and message -->
+    <h4 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #0f172a; font-family: 'Outfit', sans-serif;">{{ customAlert.titulo }}</h4>
+    <p style="margin: 0 0 24px 0; font-size: 14px; color: #475569; line-height: 1.5; font-family: 'Outfit', sans-serif;">{{ customAlert.mensaje }}</p>
+
+    <!-- Accept Button -->
+    <button (click)="cerrarAlerta()" 
+            style="width: 100%; border: none; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: white;"
+            [style.background]="customAlert.tipo === 'success' ? '#10b981' : customAlert.tipo === 'error' ? '#ef4444' : customAlert.tipo === 'warning' ? '#f59e0b' : '#3b82f6'"
+            onmouseover="this.style.filter='brightness(0.95)'"
+            onmouseout="this.style.filter='none'">
+      Entendido
+    </button>
+  </div>
+</div>
+
+<!-- Modal de Confirmación Personalizada (Custom Confirm) -->
+<div class="custom-confirm-overlay" *ngIf="customConfirm.mostrar" 
+     style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 11000; animation: fadeIn 0.25s ease-out;">
+  <div class="custom-confirm-card" 
+       style="background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 16px; padding: 24px; width: 90%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); text-align: center; animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+    
+    <!-- Warning Icon for Confirmations -->
+    <div style="margin: 0 auto 16px auto; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" style="background: #eff6ff; padding: 8px; border-radius: 50%;"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+    </div>
+
+    <!-- Title and message -->
+    <h4 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #0f172a; font-family: 'Outfit', sans-serif;">{{ customConfirm.titulo }}</h4>
+    <p style="margin: 0 0 24px 0; font-size: 14px; color: #475569; line-height: 1.5; font-family: 'Outfit', sans-serif;">{{ customConfirm.mensaje }}</p>
+
+    <!-- Confirm Buttons -->
+    <div style="display: flex; gap: 12px;">
+      <button (click)="cancelarConfirmacion()" 
+              style="flex: 1; border: 1px solid #cbd5e1; background: #f1f5f9; color: #475569; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+              onmouseover="this.style.background='#e2e8f0'"
+              onmouseout="this.style.background='#f1f5f9'">
+        Cancelar
+      </button>
+      <button (click)="aceptarConfirmacion()" 
+              style="flex: 2; border: none; background: #2563eb; color: white; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+              onmouseover="this.style.filter='brightness(0.95)'"
+              onmouseout="this.style.filter='none'">
+        Aceptar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Estilos CSS de animación para custom alert/confirm -->
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(20px) scale(0.96); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+</style>

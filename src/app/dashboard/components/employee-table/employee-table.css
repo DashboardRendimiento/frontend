@@ -1,0 +1,31 @@
+.card{
+
+margin-top:25px;
+background:white;
+padding:20px;
+border-radius:15px;
+box-shadow:0 10px 20px rgba(0,0,0,.08);
+
+}
+
+table{
+
+width:100%;
+border-collapse:collapse;
+
+}
+
+th{
+
+text-align:left;
+padding:15px;
+background:#f5f7fb;
+
+}
+
+td{
+
+padding:15px;
+border-bottom:1px solid #eee;
+
+}

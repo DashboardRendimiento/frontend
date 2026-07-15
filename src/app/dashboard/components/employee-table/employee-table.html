@@ -1,0 +1,45 @@
+<div class="card">
+
+<h2>Resumen de empleados</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Empleado</th>
+
+<th>Productividad</th>
+
+<th>Asistencia</th>
+
+<th>Horas Extra</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+@for(emp of empleados;track emp.nombre){
+
+<tr>
+
+<td>{{emp.nombre}}</td>
+
+<td>{{emp.productividad}}%</td>
+
+<td>{{emp.asistencia}}</td>
+
+<td>{{emp.horas}}</td>
+
+</tr>
+
+}
+
+</tbody>
+
+</table>
+
+</div>

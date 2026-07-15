@@ -1,0 +1,742 @@
+<div style="display: flex; min-height: 100vh; background-color: #f8fafc; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; width: 100%;">
+  
+  <!-- MENÚ LATERAL (SIDEBAR) -->
+  <div style="width: 260px; background-color: #0f172a; color: #94a3b8; display: flex; flex-direction: column; border-right: 1px solid #1e293b; position: sticky; top: 0; height: 100vh; z-index: 100; flex-shrink: 0;">
+    <!-- Brand Name -->
+    <div style="padding: 24px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 10px;">
+      <div style="background-color: #2563eb; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <span style="font-weight: 800; font-size: 18px; color: white; letter-spacing: -0.5px;">Noble RRHH</span>
+    </div>
+    
+    <!-- User info profile card in sidebar -->
+    <div style="padding: 20px 24px; border-bottom: 1px solid #1e293b; background: rgba(30, 41, 59, 0.4);">
+      <div style="font-size: 14px; font-weight: 700; color: white;">{{ usuarioActual?.name }}</div>
+      <div style="font-size: 11px; text-transform: uppercase; font-weight: 600; color: #3b82f6; margin-top: 4px; letter-spacing: 0.5px;">{{ usuarioActual?.role }}</div>
+    </div>
+    
+    <!-- Menu Links -->
+    <div style="padding: 16px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; overflow-y: auto;">
+      
+      <!-- SECCIÓN DE ADMINISTRACIÓN / SUPERVISIÓN -->
+      <ng-container *ngIf="usuarioActual?.role !== 'EMPLEADO'">
+        
+        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR'" (click)="cambiarSeccion('resumen')" 
+                [style.background-color]="(seccionActiva === 'resumen' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
+                [style.color]="(seccionActiva === 'resumen' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
+                style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; width: 100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+          Resumen y Gráficos
+        </button>
+        
+        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR' || usuarioActual?.role === 'SUPERADMIN'" (click)="cambiarSeccion('tabla')" 
+                [style.background-color]="(seccionActiva === 'tabla' || empleadoSeleccionado) ? '#1e293b' : 'transparent'"
+                [style.color]="(seccionActiva === 'tabla' || empleadoSeleccionado) ? 'white' : '#94a3b8'"
+                style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; width: 100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          Tabla de Personal
+        </button>
+        
+        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR'" (click)="cambiarSeccion('pendientes')" 
+                [style.background-color]="(seccionActiva === 'pendientes' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
+                [style.color]="(seccionActiva === 'pendientes' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
+                style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <span>Fichajes Pendientes</span>
+          </div>
+          <span *ngIf="fichajesPendientes.length > 0" style="background-color: #f59e0b; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">{{ fichajesPendientes.length }}</span>
+        </button>
+        
+        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR'" (click)="cambiarSeccion('salidas')" 
+                [style.background-color]="(seccionActiva === 'salidas' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
+                [style.color]="(seccionActiva === 'salidas' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
+                style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span>Salidas Anticipadas</span>
+          </div>
+          <span *ngIf="salidasAnticipadasDeHoy.length > 0" style="background-color: #ef4444; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">{{ salidasAnticipadasDeHoy.length }}</span>
+        </button>
+
+        <button (click)="cambiarSeccion('incumplidos')" 
+                [style.background-color]="(seccionActiva === 'incumplidos' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
+                [style.color]="(seccionActiva === 'incumplidos' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
+                style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>Objetivos Incumplidos</span>
+          </div>
+          <span *ngIf="objetivosIncumplidosHoy.length > 0" style="background-color: #e11d48; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">{{ objetivosIncumplidosHoy.length }}</span>
+        </button>
+        
+      </ng-container>
+      
+      <!-- SECCIÓN DE EMPLEADO (También accesible para Supervisor para que pueda fichar) -->
+      <ng-container *ngIf="usuarioActual?.role === 'EMPLEADO' || usuarioActual?.role === 'SUPERVISOR'">
+        <button (click)="verMiResumen()"
+                [style.background-color]="empleadoSeleccionado?.id === miPropioEmpleado?.id ? '#1e293b' : 'transparent'"
+                [style.color]="empleadoSeleccionado?.id === miPropioEmpleado?.id ? 'white' : '#94a3b8'"
+                style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; transition: all 0.2s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          Mi Fichaje y Reportes
+        </button>
+      </ng-container>
+
+      <button (click)="cambiarSeccion('perfil')" 
+              [style.background-color]="(seccionActiva === 'perfil' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
+              [style.color]="(seccionActiva === 'perfil' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
+              style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; width: 100%; margin-top: auto;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>Mi Perfil</span>
+        </div>
+      </button>
+      
+    </div>
+    
+    <!-- Logout at bottom -->
+    <div style="padding: 16px; border-top: 1px solid #1e293b;">
+      <button (click)="cerrarSesion()" 
+              style="background: transparent; border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; width: 100%; padding: 10px; border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;"
+              onmouseover="this.style.background='rgba(239, 68, 68, 0.08)'" onmouseout="this.style.background='transparent'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        Cerrar Sesión
+      </button>
+    </div>
+    
+  </div>
+  
+  <!-- MAIN CONTENT AREA -->
+  <div style="flex: 1; display: flex; flex-direction: column; overflow-x: hidden; height: 100vh;">
+    
+    <!-- Header / Top Bar -->
+    <div style="background-color: white; border-bottom: 1px solid #e2e8f0; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; min-height: 70px; flex-shrink: 0;">
+      <div>
+        <h2 style="margin: 0; font-size: 20px; color: #0f172a; font-weight: 700;">
+          {{ getTituloHeader() }}
+        </h2>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <!-- System Status indicator -->
+        <div style="display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 6px 14px; border-radius: 20px; border: 1px solid #e2e8f0;">
+          <span style="width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);"></span>
+          <span style="font-size: 13px; font-weight: 600; color: #475569;">Sistema En Línea</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Content Body -->
+    <div style="flex: 1; padding: 32px; overflow-y: auto;">
+      
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="loading" style="text-align: center; padding: 60px 20px; color: #64748b;">
+        <div class="spinner" style="margin: 0 auto 12px; width: 32px; height: 32px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin .8s linear infinite;"></div>
+        <p>Cargando información...</p>
+      </div>
+
+      <ng-container *ngIf="!loading">
+        <!-- VISTA DE DETALLE INDIVIDUAL (Para Admin al hacer clic o para Empleado por defecto) -->
+        <div *ngIf="empleadoSeleccionado">
+          <app-employee-detail
+            [employee]="empleadoSeleccionado"
+            [showBackButton]="usuarioActual?.role !== 'EMPLEADO'"
+            (backToGrid)="cambiarAVistaDetalle(null)">
+          </app-employee-detail>
+        </div>
+        
+        <!-- SECCIONES GENERALES DE ADMINISTRADOR -->
+        <div *ngIf="!empleadoSeleccionado">
+          
+          <!-- Banners de Advertencia en cabecera de la sección activa (Solo Administradores y Supervisores) -->
+          <ng-container *ngIf="usuarioActual?.isAdmin && usuarioActual?.role !== 'SUPERADMIN'">
+            
+            <!-- BANNER DE REVISIÓN FACIAL -->
+            <div *ngIf="fichajesPendientes.length > 0 && seccionActiva !== 'pendientes'"
+                 style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <div>
+                  <h4 style="margin: 0; color: #b45309; font-size: 15px; font-weight: 700;">Fichajes Pendientes de Revisión</h4>
+                  <p style="margin: 4px 0 0 0; color: #78350f; font-size: 14px;">Hay <strong>{{ fichajesPendientes.length }}</strong> fichaje(s) que requieren validación visual.</p>
+                </div>
+              </div>
+              <button (click)="cambiarSeccion('pendientes')"
+                      style="background-color: #f59e0b; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background-color 0.2s;">
+                Ver Fichajes
+              </button>
+            </div>
+            
+            <!-- BANNER DE SALIDAS ANTICIPADAS -->
+            <div *ngIf="salidasAnticipadasDeHoy.length > 0 && seccionActiva !== 'salidas'"
+                 style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <div>
+                  <h4 style="margin: 0; color: #b91c1c; font-size: 15px; font-weight: 700;">Alerta: Salidas Anticipadas de Hoy</h4>
+                  <p style="margin: 4px 0 0 0; color: #7f1d1d; font-size: 14px;">
+                    Los siguientes empleados ficharon salida antes de finalizar su turno:
+                    <span *ngFor="let s of salidasAnticipadasDeHoy; let last = last">
+                      <strong>{{ s.employeeName }}</strong> (salió a las {{ s.clockOutAt | date:'HH:mm' }}hs){{ !last ? ', ' : '' }}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <button (click)="cambiarSeccion('salidas')"
+                      style="background-color: #ef4444; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background-color 0.2s;">
+                Ver Historial
+              </button>
+            </div>
+
+            <!-- BANNER DE OBJETIVOS INCUMPLIDOS -->
+            <div *ngIf="objetivosIncumplidosHoy.length > 0 && seccionActiva !== 'incumplidos'"
+                 style="background-color: #fff1f2; border-left: 4px solid #e11d48; padding: 16px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <div>
+                  <h4 style="margin: 0; color: #9f1239; font-size: 15px; font-weight: 700;">Alerta: Objetivos Incumplidos Hoy</h4>
+                  <p style="margin: 4px 0 0 0; color: #881337; font-size: 14px;">
+                    Hay <strong>{{ objetivosIncumplidosHoy.length }}</strong> empleado(s) que salieron hoy sin cumplir su objetivo de pedidos.
+                  </p>
+                </div>
+              </div>
+              <button (click)="cambiarSeccion('incumplidos')"
+                      style="background-color: #e11d48; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background-color 0.2s;">
+                Ver Detalle
+              </button>
+            </div>
+            
+          </ng-container>
+          
+          <!-- TAB 1: RESUMEN Y GRÁFICOS -->
+          <div *ngIf="seccionActiva === 'resumen'">
+            <!-- KPI Summary Cards -->
+            <div class="kpi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+              <div class="kpi-card kpi-card--blue" style="background: white; padding: 18px 20px; border-radius: 10px; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; transition: all 0.15s;">
+                <div class="kpi-label" style="font-size: 12.5px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: .03em;">Total Empleados</div>
+                <div class="kpi-value" style="font-size: 28px; font-weight: 700; color: #0f172a; margin-top: 6px; line-height: 1.1;">{{ employees.length }}</div>
+                <div class="kpi-footnote kpi-footnote--positive" style="font-size: 12px; color: #10b981; margin-top: 6px; font-weight: 500;">Activos</div>
+              </div>
+
+              <div class="kpi-card kpi-card--purple" style="background: white; padding: 18px 20px; border-radius: 10px; border: 1px solid #e2e8f0; border-left: 4px solid #8b5cf6; transition: all 0.15s;">
+                <div class="kpi-label" style="font-size: 12.5px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: .03em;">Total Pedidos</div>
+                <div class="kpi-value" style="font-size: 28px; font-weight: 700; color: #0f172a; margin-top: 6px; line-height: 1.1;">{{ getTotalPedidos() | number }}</div>
+                <div class="kpi-footnote kpi-footnote--blue" style="font-size: 12px; color: #2563eb; margin-top: 6px; font-weight: 500;">Global</div>
+              </div>
+
+              <div class="kpi-card kpi-card--amber" style="background: white; padding: 18px 20px; border-radius: 10px; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b; transition: all 0.15s;">
+                <div class="kpi-label" style="font-size: 12.5px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: .03em;">Bultos Procesados</div>
+                <div class="kpi-value" style="font-size: 28px; font-weight: 700; color: #0f172a; margin-top: 6px; line-height: 1.1;">{{ getTotalBultos() | number }}</div>
+                <div class="kpi-footnote" style="font-size: 12px; color: #64748b; margin-top: 6px; font-weight: 500;">Total acumulado</div>
+              </div>
+
+              <div class="kpi-card kpi-card--green" style="background: white; padding: 18px 20px; border-radius: 10px; border: 1px solid #e2e8f0; border-left: 4px solid #10b981; transition: all 0.15s;">
+                <div class="kpi-label" style="font-size: 12.5px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: .03em;">Total Pendientes</div>
+                <div class="kpi-value kpi-value--green" style="font-size: 28px; font-weight: 700; color: #10b981; margin-top: 6px; line-height: 1.1;">{{ getTotalPendientes() | number }}</div>
+                <div class="kpi-footnote kpi-footnote--positive" style="font-size: 12px; color: #10b981; margin-top: 6px; font-weight: 500;">Pedidos en espera</div>
+              </div>
+            </div>
+            
+            <!-- Charts Section -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
+              <!-- Comparativa de Bultos (Bar Chart) -->
+              <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <h3 style="margin: 0 0 16px 0; font-size: 15px; color: #1e293b; font-weight: 600;">Comparación de Bultos Procesados por Operario</h3>
+                <apx-chart *ngIf="barChartOptions"
+                  [series]="barChartOptions.series"
+                  [chart]="barChartOptions.chart"
+                  [xaxis]="barChartOptions.xaxis"
+                  [yaxis]="barChartOptions.yaxis"
+                  [colors]="barChartOptions.colors"
+                  [plotOptions]="barChartOptions.plotOptions"
+                  [dataLabels]="barChartOptions.dataLabels"
+                  [grid]="barChartOptions.grid">
+                </apx-chart>
+              </div>
+
+              <!-- Distribución de Turno (Pie/Donut Chart) -->
+              <div style="background: white; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <h3 style="margin: 0 0 16px 0; font-size: 15px; color: #1e293b; font-weight: 600;">Distribución de Personal por Turno</h3>
+                <apx-chart *ngIf="donutChartOptions"
+                  [series]="donutChartOptions.series"
+                  [chart]="donutChartOptions.chart"
+                  [labels]="donutChartOptions.labels"
+                  [colors]="donutChartOptions.colors"
+                  [legend]="donutChartOptions.legend"
+                  [dataLabels]="donutChartOptions.dataLabels"
+                  [responsive]="donutChartOptions.responsive">
+                </apx-chart>
+              </div>
+            </div>
+
+            <!-- Tabla de Rendimiento Rápida en Panel de Gráficos -->
+            <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+              <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Resumen de Rendimiento Diario</h3>
+              <p style="margin: 0 0 20px 0; color: #64748b; font-size: 13.5px;">Acceso rápido a las métricas del día de hoy. Haz clic en un empleado para auditarlo detalladamente.</p>
+              
+              <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
+                  <thead>
+                    <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600;">
+                      <th style="padding: 12px 16px;">Nombre</th>
+                      <th style="padding: 12px 16px;">Puesto (Rol)</th>
+                      <th style="padding: 12px 16px;">Objetivo Diario</th>
+                      <th style="padding: 12px 16px;">Pedidos Preparados</th>
+                      <th style="padding: 12px 16px;">Cumplimiento</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let emp of employees" (click)="cambiarAVistaDetalle(emp)"
+                        style="border-bottom: 1px solid #f1f5f9; color: #334155; cursor: pointer; transition: all 0.2s;"
+                        onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+                      <td style="padding: 12px 16px; font-weight: 600; color: #2563eb;">{{ emp.name }}</td>
+                      <td style="padding: 12px 16px; color: #64748b;">{{ emp.role }}</td>
+                      <td style="padding: 12px 16px;">{{ emp.objetivoDiario }}</td>
+                      <td style="padding: 12px 16px;">{{ emp.totalPedidos }}</td>
+                      <td style="padding: 12px 16px;">
+                        <span [style.background-color]="(emp.porcentajeCumplimiento || 0) >= 100 ? '#ecfdf5' : '#fff1f2'"
+                              [style.color]="(emp.porcentajeCumplimiento || 0) >= 100 ? '#047857' : '#be123c'"
+                              style="font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 12px; display: inline-block;">
+                          {{ emp.porcentajeCumplimiento || 0 }}%
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+          
+          <!-- TAB 2: TABLA DE PERSONAL -->
+          <div *ngIf="seccionActiva === 'tabla'">
+            <section class="table-section" style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+              <div class="section-header" style="align-items: flex-start; margin-bottom: 20px;">
+                <div class="section-header-text" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                  <!-- BUSCADOR Y CONTROLES -->
+                  <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px 14px; border-radius: 8px; flex: 1; max-width: 400px;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                      <input type="text" [(ngModel)]="filtroBusqueda" (ngModelChange)="filtrarEmpleados()"
+                             placeholder="Buscar por nombre, ID, puesto..."
+                             style="border: none; outline: none; background: transparent; font-size: 14px; color: #0f172a; width: 100%;" />
+                    </div>
+
+                    <!-- BOTÓN NUEVO EMPLEADO (SOLO SUPERADMIN) -->
+                    <button type="button" *ngIf="usuarioActual?.role === 'SUPERADMIN'" (click)="abrirModalCrearEmpleado()"
+                            style="background-color: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; gap: 6px;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      Nuevo Empleado
+                    </button>
+                  </div>
+                  <span class="badge" style="width: fit-content; background-color: #eff6ff; color: #1e40af; font-size: 12px; padding: 4px 8px; border-radius: 4px; font-weight: 500; display: inline-block; margin-top: 8px;">Haz clic en cualquier fila para ver el reporte individual</span>
+                </div>
+              </div>
+
+              <!-- Tabla Standalone vinculada a filteredEmployees -->
+              <app-employee-table
+                [data]="filteredEmployees"
+                [usuarioActual]="usuarioActual"
+                (selectEmployee)="cambiarAVistaDetalle($event)"
+                (refreshData)="cargarDatos()">
+              </app-employee-table>
+            </section>
+          </div>
+          
+          <!-- TAB 3: FICHAJES PENDIENTES DE REVISIÓN -->
+          <div *ngIf="seccionActiva === 'pendientes'">
+            <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+              <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Validaciones de Identidad Pendientes</h3>
+              <p style="margin: 0 0 20px 0; color: #64748b; font-size: 13.5px;">El reconocimiento facial automático no pudo validar con total certeza la identidad de estos operarios en su fichaje de entrada. Por favor, realiza la revisión manual.</p>
+              
+              <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
+                  <thead>
+                    <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600;">
+                      <th style="padding: 12px 16px;">Empleado</th>
+                      <th style="padding: 12px 16px;">DNI</th>
+                      <th style="padding: 12px 16px;">Fecha y Hora de Fichaje</th>
+                      <th style="padding: 12px 16px;">Estado de Verificación</th>
+                      <th style="padding: 12px 16px; text-align: right;">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let r of fichajesPendientes" style="border-bottom: 1px solid #f1f5f9; color: #334155;">
+                      <td style="padding: 12px 16px; font-weight: 600; color: #0f172a;">{{ r.employeeName }}</td>
+                      <td style="padding: 12px 16px; color: #64748b;">{{ r.employeeDni }}</td>
+                      <td style="padding: 12px 16px;">{{ r.clockInAt | date:'dd/MM/yyyy HH:mm' }}hs</td>
+                      <td style="padding: 12px 16px;">
+                        <span style="background-color: #fef3c7; color: #d97706; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; text-transform: uppercase;">
+                          Pendiente Revisión
+                        </span>
+                      </td>
+                      <td style="padding: 12px 16px; text-align: right;">
+                        <button (click)="seleccionarFichaje(r); mostrarModalRevision = true;"
+                                style="background-color: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12.5px; transition: background-color 0.2s;"
+                                onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
+                          Revisar Identidad
+                        </button>
+                      </td>
+                    </tr>
+                    <tr *ngIf="fichajesPendientes.length === 0">
+                      <td colspan="5" style="padding: 32px; text-align: center; color: #64748b; font-style: italic;">
+                        No hay fichajes pendientes de revisión facial en este momento.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          <!-- TAB 4: HISTORIAL DE SALIDAS ANTICIPADAS -->
+          <div *ngIf="seccionActiva === 'salidas'">
+            <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 16px;">
+              <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Historial de Salidas Anticipadas</h3>
+              <p style="margin: 0 0 12px 0; color: #64748b; font-size: 13.5px;">Registro completo de los empleados que registraron su salida antes de cumplir con el horario de fin de turno asignado.</p>
+              
+              <!-- Controles de Filtros del Reporte -->
+              <div style="display: flex; gap: 16px; flex-wrap: wrap; background: #f1f5f9; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; align-items: center;">
+                <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  <input type="text" [(ngModel)]="busquedaReporte" (ngModelChange)="filtrarReporteSalidas()" placeholder="Buscar empleado o DNI..." 
+                         style="border: none; outline: none; background: transparent; font-size: 13.5px; width: 100%;" />
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 13px; color: #475569; font-weight: 600;">Desde:</span>
+                  <input type="date" [(ngModel)]="fechaInicioReporte" (change)="filtrarReporteSalidas()" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;" />
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 13px; color: #475569; font-weight: 600;">Hasta:</span>
+                  <input type="date" [(ngModel)]="fechaFinReporte" (change)="filtrarReporteSalidas()" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;" />
+                </div>
+              </div>
+              
+              <!-- Tabla de Reporte -->
+              <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
+                  <thead>
+                    <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600;">
+                      <th style="padding: 12px 16px;">Empleado</th>
+                      <th style="padding: 12px 16px;">DNI</th>
+                      <th style="padding: 12px 16px;">Fecha</th>
+                      <th style="padding: 12px 16px;">Horario Entrada</th>
+                      <th style="padding: 12px 16px;">Horario Salida</th>
+                      <th style="padding: 12px 16px;">Fin Programado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let r of reporteSalidasFiltrado" style="border-bottom: 1px solid #f1f5f9; color: #334155;"
+                        onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+                      <td style="padding: 12px 16px; font-weight: 600; color: #0f172a;">{{ r.employeeName }}</td>
+                      <td style="padding: 12px 16px; color: #64748b;">{{ r.employeeDni }}</td>
+                      <td style="padding: 12px 16px;">{{ r.clockOutAt | date:'dd/MM/yyyy' }}</td>
+                      <td style="padding: 12px 16px;">{{ r.clockInAt | date:'HH:mm' }}hs</td>
+                      <td style="padding: 12px 16px; font-weight: 600; color: #ef4444;">{{ r.clockOutAt | date:'HH:mm' }}hs</td>
+                      <td style="padding: 12px 16px; color: #64748b;">{{ r.horaFinProgramada }}hs</td>
+                    </tr>
+                    <tr *ngIf="reporteSalidasFiltrado.length === 0">
+                      <td colspan="6" style="padding: 32px; text-align: center; color: #64748b; font-style: italic;">
+                        No se encontraron registros de salidas anticipadas para los filtros seleccionados.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 5: OBJETIVOS INCUMPLIDOS HOY -->
+          <div *ngIf="seccionActiva === 'incumplidos'">
+            <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 16px;">
+              <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Faltas de Cumplimiento de Objetivo (Hoy)</h3>
+              <p style="margin: 0 0 12px 0; color: #64748b; font-size: 13.5px;">Listado de operarios que finalizaron y ficharon la salida de su jornada laboral el día de hoy sin llegar a completar su objetivo diario asignado.</p>
+              
+              <!-- Tabla de Reporte -->
+              <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
+                  <thead>
+                    <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600;">
+                      <th style="padding: 12px 16px;">Empleado</th>
+                      <th style="padding: 12px 16px;">DNI</th>
+                      <th style="padding: 12px 16px;">Objetivo Diario</th>
+                      <th style="padding: 12px 16px;">Pedidos Preparados</th>
+                      <th style="padding: 12px 16px;">Diferencia (Faltante)</th>
+                      <th style="padding: 12px 16px;">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let r of objetivosIncumplidosHoy" style="border-bottom: 1px solid #f1f5f9; color: #334155;">
+                      <td style="padding: 12px 16px; font-weight: 600; color: #0f172a;">{{ r.employeeName }}</td>
+                      <td style="padding: 12px 16px; color: #64748b;">{{ r.employeeDni }}</td>
+                      <td style="padding: 12px 16px;">{{ r.objetivo }}</td>
+                      <td style="padding: 12px 16px; font-weight: 600;">{{ r.preparados }}</td>
+                      <td style="padding: 12px 16px; font-weight: 700; color: #e11d48;">-{{ r.faltantes }} pedidos</td>
+                      <td style="padding: 12px 16px;">
+                        <span style="background-color: #fff1f2; color: #e11d48; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px; text-transform: uppercase;">
+                          No Cumplido
+                        </span>
+                      </td>
+                    </tr>
+                    <tr *ngIf="objetivosIncumplidosHoy.length === 0">
+                      <td colspan="6" style="padding: 32px; text-align: center; color: #64748b; font-style: italic;">
+                        Todos los operarios que trabajaron hoy cumplieron con sus objetivos diarios de pedidos. ¡Excelente desempeño!
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- TAB 6: MI PERFIL -->
+        <div *ngIf="seccionActiva === 'perfil'">
+          <app-perfil></app-perfil>
+        </div>
+        
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Crear Empleado (Solo SUPERADMIN) -->
+<div class="modal-overlay" *ngIf="mostrarModalCrearEmpleado" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); display: flex; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(4px);">
+  <div class="modal-card" style="background: white; border-radius: 16px; width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+    <!-- Header -->
+    <div style="padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+      <h3 style="margin: 0; font-size: 18px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+        Crear Nuevo Empleado
+      </h3>
+      <button (click)="cerrarModalCrearEmpleado()" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer;">&times;</button>
+    </div>
+    
+    <!-- Body -->
+    <div style="padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Nombre *</label>
+          <input type="text" [(ngModel)]="nuevoEmpleado.nombre" placeholder="Ej. Juan" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Apellido</label>
+          <input type="text" [(ngModel)]="nuevoEmpleado.apellido" placeholder="Ej. Pérez" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">DNI</label>
+          <input type="number" [(ngModel)]="nuevoEmpleado.dni" placeholder="Sin puntos" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Email *</label>
+          <input type="email" [(ngModel)]="nuevoEmpleado.email" placeholder="correo@empresa.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Contraseña *</label>
+          <input type="password" [(ngModel)]="nuevoEmpleado.passwordHash" placeholder="Mínimo 6 caracteres" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Rol en el Sistema *</label>
+          <select [(ngModel)]="nuevoEmpleado.role" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; background-color: white;">
+            <option value="EMPLEADO">Empleado (Solo operario)</option>
+            <option value="SUPERVISOR">Supervisor</option>
+            <option value="ADMINISTRADOR">Administrador</option>
+            <option value="SUPERADMIN">Super Administrador</option>
+          </select>
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Puesto / Cargo</label>
+          <input type="text" [(ngModel)]="nuevoEmpleado.puesto" placeholder="Ej. Operario de Picking" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Sector</label>
+          <input type="text" [(ngModel)]="nuevoEmpleado.sector" placeholder="Ej. Depósito 1" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Turno</label>
+          <select [(ngModel)]="nuevoEmpleado.turno" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; background-color: white;">
+            <option value="Mañana">Mañana</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Noche">Noche</option>
+          </select>
+        </div>
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Foto Facial (Opcional)</label>
+          <input type="file" (change)="onFileSelected($event)" accept="image/*" style="width: 100%; font-size: 13px; padding: 6px 0;" />
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div style="padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: flex-end; gap: 12px;">
+      <button (click)="cerrarModalCrearEmpleado()" style="background-color: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 8px; font-weight: 600; color: #475569; cursor: pointer;">Cancelar</button>
+      <button (click)="guardarNuevoEmpleado()" [disabled]="creandoEmpleado" style="background-color: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+        {{ creandoEmpleado ? 'Guardando...' : 'Crear Empleado' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Revisión de Fichajes (Solo Admin/Supervisor) -->
+<div class="modal-overlay" *ngIf="mostrarModalRevision" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); display: flex; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(4px);">
+  <div class="modal-card" style="background: white; border-radius: 16px; width: 100%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+    <!-- Header -->
+    <div style="padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+      <h3 style="margin: 0; font-size: 18px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+        Revisión de Fichajes
+      </h3>
+      <button (click)="mostrarModalRevision = false" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer;">&times;</button>
+    </div>
+    <!-- Body -->
+    <div style="display: flex; flex: 1; overflow: hidden; min-height: 400px;">
+      <!-- Lista Izquierda -->
+      <div style="width: 250px; border-right: 1px solid #e2e8f0; overflow-y: auto; background: #ffffff;">
+        <div *ngIf="fichajesPendientes.length === 0" style="padding: 20px; text-align: center; color: #64748b; font-size: 14px;">
+          No hay fichajes pendientes.
+        </div>
+        <div *ngFor="let f of fichajesPendientes"
+             (click)="seleccionarFichaje(f)"
+             [style.background]="fichajeSeleccionado?.id === f.id ? '#eff6ff' : 'transparent'"
+             [style.border-left]="fichajeSeleccionado?.id === f.id ? '4px solid #3b82f6' : '4px solid transparent'"
+             style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s;">
+          <div style="font-weight: 600; font-size: 14px; color: #1e293b; margin-bottom: 4px;">{{ f.employeeName || 'Empleado #' + f.employeeId }}</div>
+          <div style="font-size: 12px; color: #64748b;">ID: {{ f.employeeId }}</div>
+          <div style="font-size: 12px; color: #64748b;">Hora: {{ f.clockInAt | date:'HH:mm' }}</div>
+        </div>
+      </div>
+      <!-- Detalle Derecha -->
+      <div style="flex: 1; padding: 24px; display: flex; flex-direction: column; align-items: center; background: #f8fafc; overflow-y: auto;">
+        <div *ngIf="!fichajeSeleccionado" style="color: #64748b; margin-top: 100px;">
+          Selecciona un fichaje de la lista para revisarlo.
+        </div>
+        <div *ngIf="fichajeSeleccionado" style="width: 100%; max-width: 400px;">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <h4 style="margin: 0 0 4px 0; color: #0f172a; font-size: 18px;">{{ fichajeSeleccionado.employeeName || 'Empleado #' + fichajeSeleccionado.employeeId }}</h4>
+            <p style="margin: 0; color: #64748b; font-size: 14px;">Fecha/Hora: {{ fichajeSeleccionado.clockInAt | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+          <div style="background: #e2e8f0; border-radius: 12px; aspect-ratio: 4/3; margin-bottom: 24px; overflow: hidden; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            <img *ngIf="fotoFichajeUrl" [src]="fotoFichajeUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto capturada">
+            <span *ngIf="!fotoFichajeUrl" style="color: #64748b;">Cargando foto...</span>
+          </div>
+          <div style="display: flex; gap: 16px;">
+            <button (click)="procesarFichaje(false)" [disabled]="revisando"
+                    style="flex: 1; background: #ef4444; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; display: flex; justify-content: center; gap: 8px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              Rechazar
+            </button>
+            <button (click)="procesarFichaje(true)" [disabled]="revisando"
+                    style="flex: 1; background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; display: flex; justify-content: center; gap: 8px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              Aprobar
+            </button>
+          </div>
+  <div *ngIf="mostrarReporteSalidas"
+       style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+    
+    <div style="background: white; width: 90%; max-width: 900px; max-height: 85vh; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0;">
+      
+      <!-- Modal Header -->
+      <div style="padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+        <div>
+          <h3 style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            Historial de Salidas Anticipadas
+          </h3>
+          <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px;">Registro completo de las salidas de empleados previas a su horario de fin de turno.</p>
+        </div>
+        <button (click)="cerrarReporteSalidasAnticipadas()"
+                style="background: none; border: none; font-size: 24px; color: #64748b; cursor: pointer; padding: 4px; line-height: 1; border-radius: 4px; transition: background 0.15s;"
+                onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='none'">
+          &times;
+        </button>
+      </div>
+      
+      <!-- Modal Body (Filtros y Tabla) -->
+      <div style="padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px;">
+        
+        <!-- Controles de Filtros del Reporte -->
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; background: #f1f5f9; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; align-items: center;">
+          <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" [(ngModel)]="busquedaReporte" (ngModelChange)="filtrarReporteSalidas()" placeholder="Buscar empleado o DNI..." 
+                   style="border: none; outline: none; font-size: 13.5px; width: 100%;" />
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; color: #475569; font-weight: 600;">Desde:</span>
+            <input type="date" [(ngModel)]="fechaInicioReporte" (change)="filtrarReporteSalidas()" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;" />
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; color: #475569; font-weight: 600;">Hasta:</span>
+            <input type="date" [(ngModel)]="fechaFinReporte" (change)="filtrarReporteSalidas()" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;" />
+          </div>
+        </div>
+        
+        <!-- Tabla de Reporte -->
+        <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
+            <thead>
+              <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 600;">
+                <th style="padding: 12px 16px;">Empleado</th>
+                <th style="padding: 12px 16px;">DNI</th>
+                <th style="padding: 12px 16px;">Fecha</th>
+                <th style="padding: 12px 16px;">Horario Entrada</th>
+                <th style="padding: 12px 16px;">Horario Salida</th>
+                <th style="padding: 12px 16px;">Fin Programado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of reporteSalidasFiltrado" style="border-bottom: 1px solid #f1f5f9; color: #334155;"
+                  onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+                <td style="padding: 12px 16px; font-weight: 600; color: #0f172a;">{{ r.employeeName }}</td>
+                <td style="padding: 12px 16px; color: #64748b;">{{ r.employeeDni }}</td>
+                <td style="padding: 12px 16px;">{{ r.clockOutAt | date:'dd/MM/yyyy' }}</td>
+                <td style="padding: 12px 16px;">{{ r.clockInAt | date:'HH:mm' }}hs</td>
+                <td style="padding: 12px 16px; font-weight: 600; color: #ef4444;">{{ r.clockOutAt | date:'HH:mm' }}hs</td>
+                <td style="padding: 12px 16px; color: #64748b;">{{ r.horaFinProgramada }}hs</td>
+              </tr>
+              <tr *ngIf="reporteSalidasFiltrado.length === 0">
+                <td colspan="6" style="padding: 32px; text-align: center; color: #64748b; font-style: italic;">
+                  No se encontraron registros de salidas anticipadas para los filtros seleccionados.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+      </div>
+      
+      <!-- Modal Footer -->
+      <div style="padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: flex-end;">
+        <button (click)="cerrarReporteSalidasAnticipadas()"
+                style="background-color: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 8px; font-weight: 600; color: #475569; cursor: pointer; transition: all 0.2s;"
+                onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'">
+          Cerrar
+        </button>
+      </div>
+      
+    </div>
+  </div>
+</div>

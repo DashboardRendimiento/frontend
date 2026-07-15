@@ -1,0 +1,200 @@
+<!-- CONTENEDOR DE ADMINISTRACIÓN (BOTÓN PARA CREAR NUEVO EMPLEADO) -->
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-family: sans-serif;">
+  <div>
+    <p style="margin: 2px 0 0 0; color: #64748b; font-size: 13px;"></p>
+  </div>
+</div>
+
+
+
+<!-- TU TABLA ORIGINAL EXISTENTE -->
+<div class="table-responsive" style="overflow-x: auto; margin-top: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; border-radius: 8px;">
+  <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: sans-serif;">
+    <thead style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+      <tr>
+        <th style="padding: 12px;">ID</th>
+        <th style="padding: 12px;">Nombre</th>
+        <th style="padding: 12px;">Puesto</th>
+        <th style="padding: 12px;">Turno</th>
+        <th style="padding: 12px; text-align: right;">Obj. Diario</th>
+        <th *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">Pedidos/Hora</th>
+        <th *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">Bultos/Hora</th>
+        <th *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">Pendientes</th>
+        <th *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">% Cumplimiento</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Empty state when no search results found -->
+      <tr *ngIf="filteredData.length === 0">
+        <td colspan="9" style="padding: 24px; text-align: center; color: #64748b; font-size: 14px;">
+          No se encontraron operarios que coincidan con la búsqueda.
+        </td>
+      </tr>
+      <tr *ngFor="let emp of filteredData" (click)="seleccionarEmpleado(emp)"
+          style="border-bottom: 1px solid #dee2e6; cursor: pointer; transition: background-color 0.15s;"
+          onmouseover="this.style.backgroundColor='#f8fafc'"
+          onmouseout="this.style.backgroundColor='transparent'">
+        <td style="padding: 12px; font-weight: bold; color: #495057;">{{ emp.id }}</td>
+        <td style="padding: 12px; font-weight: 500; color: #1e293b;">{{ emp.name }}</td>
+        <td style="padding: 12px;">{{ emp.role }}</td>
+        <td style="padding: 12px; color: #6c757d;">{{ emp.shift }}</td>
+        <td style="padding: 12px; text-align: right; font-weight: 600; color: #2563eb;">{{ emp.objetivoDiario || 0 }}</td>
+        <td *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">{{ emp.pedidosPorHora ? (emp.pedidosPorHora | number:'1.1-1') : '0.0' }}</td>
+        <td *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right;">{{ emp.bultosPorHora ? (emp.bultosPorHora | number:'1.1-1') : '0.0' }}</td>
+        <td *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right; color: #ef4444; font-weight: 600;">{{ emp.totalPendientes | number }}</td>
+        <td *ngIf="usuarioActual?.role !== 'SUPERADMIN'" style="padding: 12px; text-align: right; font-weight: 600; color: #059669;">
+          {{ emp.porcentajeCumplimiento ? (emp.porcentajeCumplimiento | number:'1.1-1') : '0.0' }}%
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal Formulario Nuevo Empleado -->
+<div class="modal-overlay" *ngIf="mostrarFormulario">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 style="margin: 0; font-size: 18px; color: #1e293b;">Registrar Nuevo Operario</h3>
+      <button class="close-btn" (click)="cerrarFormulario()">&times;</button>
+    </div>
+
+    <form (ngSubmit)="guardarEmpleado()" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nombre">Nombre <span class="required">*</span></label>
+          <input type="text" id="nombre" name="nombre" [(ngModel)]="nuevoEmpleado.nombre" required placeholder="Ej. Martín" />
+        </div>
+        <div class="form-group">
+          <label for="apellido">Apellido <span class="required">*</span></label>
+          <input type="text" id="apellido" name="apellido" [(ngModel)]="nuevoEmpleado.apellido" required placeholder="Ej. Gómez" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dni">DNI <span class="required">*</span></label>
+          <input type="number" id="dni" name="dni" [(ngModel)]="nuevoEmpleado.dni" required placeholder="Ej. 12345678" />
+        </div>
+        <div class="form-group">
+          <label for="sector">Sector</label>
+          <input type="text" id="sector" name="sector" [(ngModel)]="nuevoEmpleado.sector" placeholder="Ej. Operaciones" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="puesto">Puesto</label>
+          <select id="puesto" name="puesto" [(ngModel)]="nuevoEmpleado.puesto">
+            <option value="Operario de Picking">Operario de Picking</option>
+            <option value="Operaria de Picking">Operaria de Picking</option>
+            <option value="Estibador / Carga">Estibador / Carga</option>
+            <option value="Supervisor">Supervisor</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="turno">Turno</label>
+          <select id="turno" name="turno" [(ngModel)]="nuevoEmpleado.turno">
+            <option value="Mañana (06-14h)">Mañana (06-14h)</option>
+            <option value="Tarde (14-22h)">Tarde (14-22h)</option>
+            <option value="Noche (22-06h)">Noche (22-06h)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="diasTrabajados">Días Trabajados (Inicial)</label>
+          <input type="number" id="diasTrabajados" name="diasTrabajados" [(ngModel)]="nuevoEmpleado.diasTrabajados" placeholder="Ej. 0" />
+        </div>
+        <div class="form-group">
+          <label for="errores">Errores de Picking (Inicial)</label>
+          <input type="number" id="errores" name="errores" [(ngModel)]="nuevoEmpleado.errores" placeholder="Ej. 0" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="cerrarFormulario()">Cancelar</button>
+        <button type="submit" class="btn-save">Registrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Formulario Horario de Trabajo -->
+<div class="modal-overlay" *ngIf="mostrarFormularioHorario">
+  <div class="modal-card" style="max-width: 480px; font-family: sans-serif;">
+    <div class="modal-header">
+      <h3 style="margin: 0; font-size: 18px; color: #1e293b;">Gestionar Horario de Trabajo</h3>
+      <button class="close-btn" (click)="cerrarFormularioHorario()">&times;</button>
+    </div>
+    <p style="font-size: 13px; color: #64748b; margin: 8px 0 16px 0;">
+      Establece los días de la semana y las horas asignadas para <strong>{{ empleadoParaHorario?.name }}</strong>.
+    </p>
+
+    <form (ngSubmit)="guardarHorario()" style="display: flex; flex-direction: column; gap: 16px;">
+      <!-- Días de la semana -->
+      <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 4px; display: block;">Días Laborales</label>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; cursor: pointer;">
+            <input type="checkbox" [(ngModel)]="diasSeleccionados['MONDAY']" name="mon" /> Lunes
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; cursor: pointer;">
+            <input type="checkbox" [(ngModel)]="diasSeleccionados['TUESDAY']" name="tue" /> Martes
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; cursor: pointer;">
+            <input type="checkbox" [(ngModel)]="diasSeleccionados['WEDNESDAY']" name="wed" /> Miércoles
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; cursor: pointer;">
+            <input type="checkbox" [(ngModel)]="diasSeleccionados['THURSDAY']" name="thu" /> Jueves
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; cursor: pointer;">
+            <input type="checkbox" [(ngModel)]="diasSeleccionados['FRIDAY']" name="fri" /> Viernes
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; cursor: pointer;">
+            <input type="checkbox" [(ngModel)]="diasSeleccionados['SATURDAY']" name="sat" /> Sábado
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; cursor: pointer;">
+            <input type="checkbox" [(ngModel)]="diasSeleccionados['SUNDAY']" name="sun" /> Domingo
+          </label>
+        </div>
+      </div>
+
+      <!-- Horas -->
+      <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="horaInicio" style="font-weight: 600; font-size: 13px; color: #475569;">Hora de Entrada</label>
+          <input type="time" id="horaInicio" name="horaInicio" [(ngModel)]="horaInicio" required
+                 style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; color: #334155;" />
+        </div>
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="horaFin" style="font-weight: 600; font-size: 13px; color: #475569;">Hora de Salida</label>
+          <input type="time" id="horaFin" name="horaFin" [(ngModel)]="horaFin" required
+                 style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; color: #334155;" />
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+        <div>
+          <button *ngIf="horarioIdExistente" type="button" (click)="eliminarHorario()"
+                  style="background-color: transparent; color: #ef4444; border: 1px solid #fee2e2; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s;"
+                  onmouseover="this.style.backgroundColor='#fef2f2'"
+                  onmouseout="this.style.backgroundColor='transparent'">
+            Quitar Horario
+          </button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" (click)="cerrarFormularioHorario()"
+                  style="background-color: #f1f5f9; color: #475569; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s;"
+                  onmouseover="this.style.backgroundColor='#e2e8f0'"
+                  onmouseout="this.style.backgroundColor='#f1f5f9'">Cancelar</button>
+          <button type="submit"
+                  style="background-color: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background-color 0.2s;"
+                  onmouseover="this.style.backgroundColor='#1d4ed8'"
+                  onmouseout="this.style.backgroundColor='#2563eb'">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

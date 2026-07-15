@@ -9,4 +9,8 @@ import { RouterOutlet } from '@angular/router';
 })
 export class App {
   protected readonly title = signal('frontend');
+
+  constructor() {
+    console.log('🏠 [App] App Root component constructor executed');
+  }
 }

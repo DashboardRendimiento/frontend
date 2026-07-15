@@ -1,0 +1,27 @@
+<div class="dashboard">
+
+  <h1>Dashboard Recursos Humanos</h1>
+
+  <!-- Sección de Tarjetas (KPIs) -->
+  <div class="cards">
+    @for(kpi of kpis; track kpi.titulo){
+      <div class="card">
+        <div class="icono">
+          {{kpi.icono}}
+        </div>
+        <h3>{{kpi.titulo}}</h3>
+        <h2>{{kpi.valor}}</h2>
+      </div>
+    }
+  </div>
+
+  <!-- Sección de Gráficos (Agregada aquí abajo) -->
+  <div class="charts">
+    <app-bar-chart></app-bar-chart>
+    <app-pie-chart></app-pie-chart>
+  </div>
+
+  <!-- Tabla de Empleados (Agregada al final) -->
+  <app-employee-table></app-employee-table>
+
+</div>
