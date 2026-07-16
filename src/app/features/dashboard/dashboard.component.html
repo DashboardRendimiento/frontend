@@ -1,5 +1,5 @@
 <div style="display: flex; min-height: 100vh; background-color: #f8fafc; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; width: 100%;">
-  
+
   <!-- MENÚ LATERAL (SIDEBAR) -->
   <div style="width: 260px; background-color: #0f172a; color: #94a3b8; display: flex; flex-direction: column; border-right: 1px solid #1e293b; position: sticky; top: 0; height: 100vh; z-index: 100; flex-shrink: 0;">
     <!-- Brand Name -->
@@ -9,36 +9,36 @@
       </div>
       <span style="font-weight: 800; font-size: 18px; color: white; letter-spacing: -0.5px;">Noble RRHH</span>
     </div>
-    
+
     <!-- User info profile card in sidebar -->
     <div style="padding: 20px 24px; border-bottom: 1px solid #1e293b; background: rgba(30, 41, 59, 0.4);">
       <div style="font-size: 14px; font-weight: 700; color: white;">{{ usuarioActual?.name }}</div>
       <div style="font-size: 11px; text-transform: uppercase; font-weight: 600; color: #3b82f6; margin-top: 4px; letter-spacing: 0.5px;">{{ usuarioActual?.role }}</div>
     </div>
-    
+
     <!-- Menu Links -->
     <div style="padding: 16px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; overflow-y: auto;">
-      
+
       <!-- SECCIÓN DE ADMINISTRACIÓN / SUPERVISIÓN -->
       <ng-container *ngIf="usuarioActual?.role !== 'EMPLEADO'">
-        
-        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR'" (click)="cambiarSeccion('resumen')" 
+
+        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR'" (click)="cambiarSeccion('resumen')"
                 [style.background-color]="(seccionActiva === 'resumen' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
                 [style.color]="(seccionActiva === 'resumen' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
                 style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; width: 100%;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
           Resumen y Gráficos
         </button>
-        
-        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR' || usuarioActual?.role === 'SUPERADMIN'" (click)="cambiarSeccion('tabla')" 
+
+        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR' || usuarioActual?.role === 'SUPERADMIN'" (click)="cambiarSeccion('tabla')"
                 [style.background-color]="(seccionActiva === 'tabla' || empleadoSeleccionado) ? '#1e293b' : 'transparent'"
                 [style.color]="(seccionActiva === 'tabla' || empleadoSeleccionado) ? 'white' : '#94a3b8'"
                 style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; width: 100%;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           Tabla de Personal
         </button>
-        
-        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR'" (click)="cambiarSeccion('pendientes')" 
+
+        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR'" (click)="cambiarSeccion('pendientes')"
                 [style.background-color]="(seccionActiva === 'pendientes' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
                 [style.color]="(seccionActiva === 'pendientes' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
                 style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; width: 100%;">
@@ -48,8 +48,8 @@
           </div>
           <span *ngIf="fichajesPendientes.length > 0" style="background-color: #f59e0b; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">{{ fichajesPendientes.length }}</span>
         </button>
-        
-        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR'" (click)="cambiarSeccion('salidas')" 
+
+        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERVISOR'" (click)="cambiarSeccion('salidas')"
                 [style.background-color]="(seccionActiva === 'salidas' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
                 [style.color]="(seccionActiva === 'salidas' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
                 style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; width: 100%;">
@@ -64,7 +64,7 @@
           <span *ngIf="salidasAnticipadasDeHoy.length > 0" style="background-color: #ef4444; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">{{ salidasAnticipadasDeHoy.length }}</span>
         </button>
 
-        <button (click)="cambiarSeccion('incumplidos')" 
+        <button (click)="cambiarSeccion('incumplidos')"
                 [style.background-color]="(seccionActiva === 'incumplidos' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
                 [style.color]="(seccionActiva === 'incumplidos' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
                 style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; width: 100%;">
@@ -78,17 +78,17 @@
           </div>
           <span *ngIf="objetivosIncumplidosHoy.length > 0" style="background-color: #e11d48; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">{{ objetivosIncumplidosHoy.length }}</span>
         </button>
-        
-        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERADMIN'" (click)="cambiarSeccion('carga-horas')" 
+
+        <button *ngIf="usuarioActual?.role === 'ADMINISTRADOR' || usuarioActual?.role === 'SUPERADMIN'" (click)="cambiarSeccion('carga-horas')"
                 [style.background-color]="(seccionActiva === 'carga-horas' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
                 [style.color]="(seccionActiva === 'carga-horas' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
                 style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; width: 100%;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           Carga de Horas
         </button>
-        
+
       </ng-container>
-      
+
       <!-- SECCIÓN DE EMPLEADO (También accesible para Supervisor para que pueda fichar) -->
       <ng-container *ngIf="usuarioActual?.role === 'EMPLEADO' || usuarioActual?.role === 'SUPERVISOR'">
         <button (click)="verMiResumen()"
@@ -100,7 +100,7 @@
         </button>
       </ng-container>
 
-      <button (click)="cambiarSeccion('perfil')" 
+      <button (click)="cambiarSeccion('perfil')"
               [style.background-color]="(seccionActiva === 'perfil' && !empleadoSeleccionado) ? '#1e293b' : 'transparent'"
               [style.color]="(seccionActiva === 'perfil' && !empleadoSeleccionado) ? 'white' : '#94a3b8'"
               style="border: none; text-align: left; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; width: 100%; margin-top: auto;">
@@ -109,24 +109,24 @@
           <span>Mi Perfil</span>
         </div>
       </button>
-      
+
     </div>
-    
+
     <!-- Logout at bottom -->
     <div style="padding: 16px; border-top: 1px solid #1e293b;">
-      <button (click)="cerrarSesion()" 
+      <button (click)="cerrarSesion()"
               style="background: transparent; border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; width: 100%; padding: 10px; border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;"
               onmouseover="this.style.background='rgba(239, 68, 68, 0.08)'" onmouseout="this.style.background='transparent'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         Cerrar Sesión
       </button>
     </div>
-    
+
   </div>
-  
+
   <!-- MAIN CONTENT AREA -->
   <div style="flex: 1; display: flex; flex-direction: column; overflow-x: hidden; height: 100vh;">
-    
+
     <!-- Header / Top Bar -->
     <div style="background-color: white; border-bottom: 1px solid #e2e8f0; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; min-height: 70px; flex-shrink: 0;">
       <div>
@@ -142,10 +142,10 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Content Body -->
     <div style="flex: 1; padding: 32px; overflow-y: auto;">
-      
+
       <!-- Loading State -->
       <div class="loading-state" *ngIf="loading" style="text-align: center; padding: 60px 20px; color: #64748b;">
         <div class="spinner" style="margin: 0 auto 12px; width: 32px; height: 32px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin .8s linear infinite;"></div>
@@ -161,13 +161,13 @@
             (backToGrid)="cambiarAVistaDetalle(null)">
           </app-employee-detail>
         </div>
-        
+
         <!-- SECCIONES GENERALES DE ADMINISTRADOR -->
         <div *ngIf="!empleadoSeleccionado">
-          
+
           <!-- Banners de Advertencia en cabecera de la sección activa (Solo Administradores y Supervisores) -->
           <ng-container *ngIf="usuarioActual?.isAdmin && usuarioActual?.role !== 'SUPERADMIN'">
-            
+
             <!-- BANNER DE REVISIÓN FACIAL -->
             <div *ngIf="fichajesPendientes.length > 0 && seccionActiva !== 'pendientes'"
                  style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
@@ -183,7 +183,7 @@
                 Ver Fichajes
               </button>
             </div>
-            
+
             <!-- BANNER DE SALIDAS ANTICIPADAS -->
             <div *ngIf="salidasAnticipadasDeHoy.length > 0 && seccionActiva !== 'salidas'"
                  style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
@@ -230,9 +230,9 @@
                 Ver Detalle
               </button>
             </div>
-            
+
           </ng-container>
-          
+
           <!-- TAB 1: RESUMEN Y GRÁFICOS -->
           <div *ngIf="seccionActiva === 'resumen'">
             <!-- KPI Summary Cards -->
@@ -256,7 +256,7 @@
                 <div class="kpi-footnote kpi-footnote--positive" style="font-size: 12px; color: #10b981; margin-top: 6px; font-weight: 500;">Pedidos en espera</div>
               </div>
             </div>
-            
+
             <!-- Charts Section -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
               <!-- Comparativa de Bultos (Bar Chart) -->
@@ -289,11 +289,11 @@
               </div>
             </div>
 
-            <!-- Tabla de Rendimiento Rápida en Panel de Gráficos -->
+            <!-- Tabla de Rendimiento Rápida en Panel de Graficos -->
             <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
               <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Resumen de Rendimiento Diario</h3>
               <p style="margin: 0 0 20px 0; color: #64748b; font-size: 13.5px;">Acceso rápido a las métricas del día de hoy. Haz clic en un empleado para auditarlo detalladamente.</p>
-              
+
               <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
                   <thead>
@@ -327,7 +327,7 @@
             </div>
 
           </div>
-          
+
           <!-- TAB 2: TABLA DE PERSONAL -->
           <div *ngIf="seccionActiva === 'tabla'">
             <section class="table-section" style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
@@ -362,13 +362,13 @@
               </app-employee-table>
             </section>
           </div>
-          
+
           <!-- TAB 3: FICHAJES PENDIENTES DE REVISIÓN -->
           <div *ngIf="seccionActiva === 'pendientes'">
             <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
               <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Validaciones de Identidad Pendientes</h3>
               <p style="margin: 0 0 20px 0; color: #64748b; font-size: 13.5px;">El reconocimiento facial automático no pudo validar con total certeza la identidad de estos operarios en su fichaje de entrada. Por favor, realiza la revisión manual.</p>
-              
+
               <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
                   <thead>
@@ -408,18 +408,18 @@
               </div>
             </div>
           </div>
-          
+
           <!-- TAB 4: HISTORIAL DE SALIDAS ANTICIPADAS -->
           <div *ngIf="seccionActiva === 'salidas'">
             <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 16px;">
               <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Historial de Salidas Anticipadas</h3>
               <p style="margin: 0 0 12px 0; color: #64748b; font-size: 13.5px;">Registro completo de los empleados que registraron su salida antes de cumplir con el horario de fin de turno asignado.</p>
-              
+
               <!-- Controles de Filtros del Reporte -->
               <div style="display: flex; gap: 16px; flex-wrap: wrap; background: #f1f5f9; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; align-items: center;">
                 <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                  <input type="text" [(ngModel)]="busquedaReporte" (ngModelChange)="filtrarReporteSalidas()" placeholder="Buscar empleado o DNI..." 
+                  <input type="text" [(ngModel)]="busquedaReporte" (ngModelChange)="filtrarReporteSalidas()" placeholder="Buscar empleado o DNI..."
                          style="border: none; outline: none; background: transparent; font-size: 13.5px; width: 100%;" />
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -431,7 +431,7 @@
                   <input type="date" [(ngModel)]="fechaFinReporte" (change)="filtrarReporteSalidas()" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;" />
                 </div>
               </div>
-              
+
               <!-- Tabla de Reporte -->
               <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
@@ -471,7 +471,7 @@
             <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 16px;">
               <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Faltas de Cumplimiento de Objetivo (Hoy)</h3>
               <p style="margin: 0 0 12px 0; color: #64748b; font-size: 13.5px;">Listado de operarios que finalizaron y ficharon la salida de su jornada laboral el día de hoy sin llegar a completar su objetivo diario asignado.</p>
-              
+
               <!-- Tabla de Reporte -->
               <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
@@ -511,7 +511,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- TAB 7: CARGA DE HORAS -->
           <div *ngIf="seccionActiva === 'carga-horas'">
              <app-carga-horas></app-carga-horas>
@@ -521,7 +521,7 @@
         <div *ngIf="seccionActiva === 'perfil'">
           <app-perfil></app-perfil>
         </div>
-        
+
       </ng-container>
     </div>
   </div>
@@ -538,7 +538,7 @@
       </h3>
       <button (click)="cerrarModalCrearEmpleado()" style="background: transparent; border: none; font-size: 24px; color: #64748b; cursor: pointer;">&times;</button>
     </div>
-    
+
     <!-- Body -->
     <div style="padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px;">
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
@@ -593,7 +593,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Footer -->
     <div style="padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: flex-end; gap: 12px;">
       <button (click)="cerrarModalCrearEmpleado()" style="background-color: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 8px; font-weight: 600; color: #475569; cursor: pointer;">Cancelar</button>
@@ -660,9 +660,9 @@
           </div>
   <div *ngIf="mostrarReporteSalidas"
        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000;">
-    
+
     <div style="background: white; width: 90%; max-width: 900px; max-height: 85vh; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0;">
-      
+
       <!-- Modal Header -->
       <div style="padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
         <div>
@@ -682,15 +682,15 @@
           &times;
         </button>
       </div>
-      
+
       <!-- Modal Body (Filtros y Tabla) -->
       <div style="padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px;">
-        
+
         <!-- Controles de Filtros del Reporte -->
         <div style="display: flex; gap: 16px; flex-wrap: wrap; background: #f1f5f9; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; align-items: center;">
           <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" [(ngModel)]="busquedaReporte" (ngModelChange)="filtrarReporteSalidas()" placeholder="Buscar empleado o DNI..." 
+            <input type="text" [(ngModel)]="busquedaReporte" (ngModelChange)="filtrarReporteSalidas()" placeholder="Buscar empleado o DNI..."
                    style="border: none; outline: none; font-size: 13.5px; width: 100%;" />
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -702,7 +702,7 @@
             <input type="date" [(ngModel)]="fechaFinReporte" (change)="filtrarReporteSalidas()" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;" />
           </div>
         </div>
-        
+
         <!-- Tabla de Reporte -->
         <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white;">
           <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px;">
@@ -734,9 +734,9 @@
             </tbody>
           </table>
         </div>
-        
+
       </div>
-      
+
       <!-- Modal Footer -->
       <div style="padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: flex-end;">
         <button (click)="cerrarReporteSalidasAnticipadas()"
@@ -745,7 +745,7 @@
           Cerrar
         </button>
       </div>
-      
+
     </div>
   </div>
 </div>

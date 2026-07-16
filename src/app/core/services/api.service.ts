@@ -74,7 +74,7 @@ export class ApiService {
                 id: idStr,
                 name: displayName,
                 role: emp.puesto || 'Operario',
-                shift: emp.turno || 'MaÃ±ana',
+                shift: emp.turno || 'Mañana',
                 dni: emp.dni,
                 active: emp.active !== false,
                 totalPedidos: kpi ? kpi.totalPedidos : 0,
@@ -337,6 +337,12 @@ export class ApiService {
     );
   }
 
+  getAllWorkSchedules(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/work-schedules`).pipe(
+      catchError(err => of([]))
+    );
+  }
+
   saveWorkSchedule(schedule: { employeeId: number, workDays: string[], startTime: string, endTime: string }): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/work-schedules`, schedule);
   }
@@ -353,11 +359,17 @@ export class ApiService {
   // PLANTILLAS DE HORAS
   // ==========================
   getPlantillaHoras(empleadoId: number, fecha: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/plantillas-horas/empleado/${empleadoId}/fecha/${fecha}`);
+    return this.http.get<any[]>(`${this.baseUrl}/plantilla-horas/fecha/${fecha}?t=${new Date().getTime()}`).pipe(
+      map(plantillas => plantillas.find(p => p.empleadoId == empleadoId) || null)
+    );
+  }
+
+  getPlantillaHorasPorFecha(fecha: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/plantilla-horas/fecha/${fecha}?t=${new Date().getTime()}`);
   }
 
   savePlantillaHoras(plantilla: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/plantillas-horas`, plantilla);
+    return this.http.post<any>(`${this.baseUrl}/plantilla-horas`, plantilla);
   }
 }
 

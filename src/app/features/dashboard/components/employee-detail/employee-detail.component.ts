@@ -92,6 +92,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   scheduleDays: string = '';
   scheduleTime: string = '';
   scheduleRaw: any = null;
+  plantillaHoras: any = null;
 
   isClockedIn = false;
   attendanceHistory: any[] = [];
@@ -146,7 +147,13 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   }
 
   cargarKpi(): void {
-    const numericId = parseInt(this.employee.id.replace('EMP-', ''), 10);
+    let numericId = 0;
+    if (typeof this.employee.id === 'number') {
+      numericId = this.employee.id;
+    } else if (typeof this.employee.id === 'string') {
+      const match = this.employee.id.match(/\d+/);
+      numericId = match ? parseInt(match[0], 10) : 0;
+    }
     this.apiService.getKpiEmpleado(numericId).subscribe({
       next: (kpi) => {
         this.employeeKpi = kpi;
@@ -159,7 +166,13 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   cargarPromediosPeriodo(): void {
     if (!this.fechaInicio || !this.fechaFin) return;
 
-    const numericId = parseInt(this.employee.id.replace('EMP-', ''), 10);
+    let numericId = 0;
+    if (typeof this.employee.id === 'number') {
+      numericId = this.employee.id;
+    } else if (typeof this.employee.id === 'string') {
+      const match = this.employee.id.match(/\d+/);
+      numericId = match ? parseInt(match[0], 10) : 0;
+    }
     this.periodKpis.cargando = true;
 
     forkJoin({
@@ -470,7 +483,22 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   }
 
   cargarHorarioYAsistencia(): void {
-    const numericId = parseInt(this.employee.id.replace('EMP-', ''), 10);
+    let numericId = 0;
+    if (typeof this.employee.id === 'number') {
+      numericId = this.employee.id;
+    } else if (typeof this.employee.id === 'string') {
+      const match = this.employee.id.match(/\d+/);
+      numericId = match ? parseInt(match[0], 10) : 0;
+    }
+    console.error('[EmployeeDetail] Fetching schedule for numericId:', numericId);
+
+    // Cargar plantillaHoras para la vista de empleado
+    this.apiService.getPlantillaHoras(numericId, new Date().toISOString().split('T')[0]).subscribe({
+      next: (ph) => {
+        this.plantillaHoras = ph;
+        this.cdr.detectChanges();
+      }
+    });
 
     if (this.isEmployeeUser) {
       // 1. Aplicar Fallback de Horarios directamente para empleados (evita 403 en consola)

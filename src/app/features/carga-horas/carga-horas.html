@@ -1,1 +1,124 @@
-<p>carga-horas works!</p>
+<div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);">
+  
+  <!-- Header y Selector de Fecha -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
+    <div>
+      <h3 style="margin: 0 0 4px 0; font-size: 20px; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        Planilla de Carga de Horas
+      </h3>
+      <p style="margin: 0; color: #64748b; font-size: 14px;">Registra el horario de entrada y salida del personal o sus licencias</p>
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <label style="font-weight: 600; font-size: 14px; color: #334155;">Fecha:</label>
+      <input type="date" [(ngModel)]="fecha" (change)="onFechaChange()" 
+             style="padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; background-color: #f8fafc; font-weight: 500; cursor: pointer; color: #1e293b;" />
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div [style.display]="loading ? 'flex' : 'none'" style="flex-direction: column; align-items: center; justify-content: center; padding: 48px 0;">
+    <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <p style="margin-top: 16px; color: #64748b; font-weight: 500;">Cargando planilla...</p>
+  </div>
+
+  <!-- Grid/Table -->
+  <div [style.display]="!loading ? 'block' : 'none'" style="overflow-x: auto; border-radius: 8px; border: 1px solid #e2e8f0;">
+    <table style="width: 100%; border-collapse: collapse; min-width: 800px; text-align: left;">
+      <thead>
+        <tr style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+          <th style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Empleado</th>
+          <th style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; width: 140px; text-align: center;">Horario de Entrada</th>
+          <th style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; width: 140px; text-align: center;">Horario de Salida</th>
+          <th style="padding: 12px 8px; font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; text-align: center;">Hrs. Trab</th>
+          <th style="padding: 12px 8px; font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; text-align: center;">Hrs. Extra</th>
+          <th style="padding: 12px 8px; font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; text-align: center;">Tardanza (m)</th>
+          <th style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; width: 180px;">Licencia</th>
+          <th style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; width: 100px; text-align: center;">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of empleadosRow" style="border-bottom: 1px solid #f1f5f9; transition: background-color 0.15s;" [style.background-color]="row.licencia ? '#fef2f2' : 'transparent'">
+          
+          <!-- Empleado Info -->
+          <td style="padding: 12px 16px;">
+            <div style="font-weight: 600; color: #0f172a; font-size: 14px;">{{ row.name }}</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 2px;">{{ row.puesto }}</div>
+          </td>
+
+          <!-- Hora Entrada -->
+          <td style="padding: 12px 16px; text-align: center;">
+            <input type="time" [(ngModel)]="row.horaEntrada" [disabled]="row.licencia" (change)="calcularHorasTrabajadas(row)"
+                   style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center; color: #0f172a;" />
+          </td>
+
+          <!-- Hora Salida -->
+          <td style="padding: 12px 16px; text-align: center;">
+            <input type="time" [(ngModel)]="row.horaSalida" [disabled]="row.licencia" (change)="calcularHorasTrabajadas(row)"
+                   style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center; color: #0f172a;" />
+          </td>
+
+          <!-- Hrs Trabajadas (Auto) -->
+          <td style="padding: 12px 8px; text-align: center;">
+            <input type="number" [(ngModel)]="row.horasTrabajadas" readonly
+                   style="width: 65px; padding: 6px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; text-align: center; background-color: #f1f5f9; color: #475569; font-weight: 600; cursor: not-allowed;" />
+          </td>
+
+          <!-- Hrs Extra (Manual) -->
+          <td style="padding: 12px 8px; text-align: center;">
+            <input type="number" [(ngModel)]="row.horasExtra" [disabled]="row.licencia" step="0.5"
+                   style="width: 65px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; text-align: center; background-color: white;" />
+          </td>
+
+          <!-- Tardanza (Auto) -->
+          <td style="padding: 12px 8px; text-align: center;">
+            <input type="number" [(ngModel)]="row.minutosTardanza" readonly
+                   style="width: 65px; padding: 6px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; text-align: center; background-color: #f1f5f9; color: #ef4444; font-weight: 600; cursor: not-allowed;" />
+          </td>
+
+          <!-- Licencia Check & Select -->
+          <td style="padding: 12px 16px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #334155; cursor: pointer; margin-bottom: 6px;">
+              <input type="checkbox" [(ngModel)]="row.licencia" (change)="onLicenciaChange(row)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #ef4444;" />
+              Ausente / Licencia
+            </label>
+            <select *ngIf="row.licencia" [(ngModel)]="row.tipoLicencia"
+                    style="width: 100%; padding: 6px 8px; border: 1px solid #fca5a5; border-radius: 6px; font-size: 12px; background-color: #fff5f5; color: #b91c1c; outline: none;">
+              <option value="">Seleccione tipo...</option>
+              <option *ngFor="let tipo of tiposLicencia" [value]="tipo">{{ tipo }}</option>
+            </select>
+          </td>
+
+          <!-- Acciones -->
+          <td style="padding: 12px 16px; text-align: center; vertical-align: middle;">
+            <button (click)="guardarFila(row)" [disabled]="row.saving || (row.licencia && !row.tipoLicencia)"
+                    style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; border: none;"
+                    [ngStyle]="{
+                      'background-color': row.success ? '#10b981' : row.error ? '#ef4444' : '#2563eb',
+                      'color': 'white'
+                    }">
+              <span *ngIf="row.saving">...</span>
+              <span *ngIf="row.success"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+              <span *ngIf="row.error"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span>
+              <span *ngIf="!row.saving && !row.success && !row.error">{{ row.exists ? 'Modificar' : 'Guardar' }}</span>
+            </button>
+          </td>
+
+        </tr>
+        <tr *ngIf="empleadosRow.length === 0">
+          <td colspan="5" style="padding: 24px; text-align: center; color: #64748b; font-size: 14px;">
+            No hay empleados para mostrar
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>

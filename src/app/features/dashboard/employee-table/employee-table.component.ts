@@ -85,7 +85,11 @@ export class EmployeeTableComponent implements OnChanges, OnInit {
         (emp.shift && emp.shift.toLowerCase().includes(query))
       );
     }
-    this.filteredData = filtered;
+    this.filteredData = filtered.sort((a, b) => {
+      if (!a.ultimaHoraCarga) return 1;
+      if (!b.ultimaHoraCarga) return -1;
+      return new Date(b.ultimaHoraCarga).getTime() - new Date(a.ultimaHoraCarga).getTime();
+    });
   }
 
   limpiarBusqueda(): void {
