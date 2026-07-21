@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Client, Message } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { Subject, Observable, BehaviorSubject } from 'rxjs';
-import { environment } from '../../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +17,7 @@ export class WebSocketService {
 
   constructor() {
     this.stompClient = new Client({
-      webSocketFactory: () => new SockJS(environment.apiUrl.replace('/api', '/ws')),
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
@@ -50,7 +50,7 @@ export class WebSocketService {
     const token = localStorage.getItem('token');
     if (token) {
       this.stompClient.connectHeaders = {
-        'Authorization': Bearer  + token
+        'Authorization': 'Bearer ' + token
       };
     }
     
