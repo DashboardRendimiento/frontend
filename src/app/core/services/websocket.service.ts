@@ -50,7 +50,7 @@ export class WebSocketService {
     const token = localStorage.getItem('token');
     if (token) {
       this.stompClient.connectHeaders = {
-        'Authorization': `Bearer ` + token
+        'Authorization': Bearer  + token
       };
     }
     
