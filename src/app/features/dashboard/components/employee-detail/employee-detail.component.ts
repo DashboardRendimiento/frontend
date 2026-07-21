@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ChangeDetect
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EmployeePerformance } from '../../../../core/models/employee.model';
+import { WebSocketService } from '../../../../core/services/websocket.service';
 import { ApiService } from '../../../../core/services/api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NgApexchartsModule } from 'ng-apexcharts';
@@ -117,6 +118,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
 
   private apiService = inject(ApiService);
+  private wsService = inject(WebSocketService);
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
 

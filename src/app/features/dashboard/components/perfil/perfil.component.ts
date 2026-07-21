@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { WebSocketService } from '../../../../core/services/websocket.service';
 import { ApiService } from '../../../../core/services/api.service';
 import { Empleado } from '../../../../core/models/employee.model';
 
