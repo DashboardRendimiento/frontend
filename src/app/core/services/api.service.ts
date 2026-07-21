@@ -54,7 +54,7 @@ export class ApiService {
 
         // Obtener el KPI individual de cada operario
         const kpiRequests$ = empleados.map(emp =>
-          this.http.get<any>(`${this.baseUrl}/productividad/kpi/${emp.id}`).pipe(
+          this.http.get<any>(`${this.baseUrl}/productividad/kpi/empleado/${emp.id}`).pipe(
             map(kpi => ({ empId: emp.id, kpi })),
             catchError(() => of({ empId: emp.id, kpi: null }))
           )
@@ -188,14 +188,14 @@ export class ApiService {
 
   getKpiEmpleado(empleadoId: number): Observable<any> {
     if (this.authService.isEmployee() && this.authService.getEmployeeId() === empleadoId) {
-      return this.http.get<any>(`${this.baseUrl}/productividad/kpi/me`).pipe(
+      return this.http.get<any>(`${this.baseUrl}/productividad/kpi/mi-kpi`).pipe(
         catchError(err => {
           console.error('Error al obtener mi KPI:', err);
           return of(null);
         })
       );
     }
-    return this.http.get<any>(`${this.baseUrl}/productividad/kpi/${empleadoId}`).pipe(
+    return this.http.get<any>(`${this.baseUrl}/productividad/kpi/empleado/${empleadoId}`).pipe(
       catchError(err => {
         console.warn(` [ApiService] Mocking KPI para empleado ${empleadoId}`);
         return of(null);
