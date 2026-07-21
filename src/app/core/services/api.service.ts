@@ -42,6 +42,36 @@ export class ApiService {
   // Retorna los datos unificados y calculados 100% en el frontend sin cambiar el backend
   getEmployeeData(): Observable<EmployeePerformance[]> {
     console.log(' [ApiService] getEmployeeData() iniciado');
+    if (this.authService.isEmployee()) {
+      return this.getMiPerfil().pipe(
+        switchMap(emp => {
+          if (!emp) return of([]);
+          return this.http.get<any>(`${this.baseUrl}/productividad/kpi/mi-kpi`).pipe(
+            map(kpi => {
+              const lastName = emp.apellido === 'Sin apellido' ? '' : (emp.apellido || '');
+              const displayName = `${emp.nombre} ${lastName}`.trim();
+              return [{
+                id: 'EMP-' + String(emp.id).padStart(3, '0'),
+                name: displayName,
+                role: emp.puesto || 'Operario',
+                shift: emp.turno || 'Mañana',
+                dni: emp.dni,
+                active: emp.active !== false,
+                totalPedidos: kpi ? kpi.totalPedidos : 0,
+                totalPendientes: kpi ? kpi.pedidosPendientesObjetivo : 0,
+                pedidosPorHora: kpi ? kpi.pedidosPorHora : 0,
+                promedioPedidosPorJornada: kpi ? kpi.promedioPedidosPorJornada : 0,
+                porcentajeCumplimiento: kpi ? kpi.porcentajeCumplimiento : 0,
+                ultimaHoraCarga: kpi ? kpi.ultimaHoraCarga : null,
+                objetivoDiario: kpi && kpi.objetivoPedidos ? Math.round(kpi.objetivoPedidos / 6) : 0
+              }];
+            }),
+            catchError(() => of([]))
+          );
+        }),
+        catchError(() => of([]))
+      );
+    }
     return this.http.get<any[]>(`${this.baseUrl}/empleados`).pipe(
       catchError(err => {
         console.error(' [ApiService] Error al obtener empleados:', err);
