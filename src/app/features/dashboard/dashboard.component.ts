@@ -1,9 +1,10 @@
-﻿import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { WebSocketService } from '../../core/services/websocket.service';
 import { Router } from '@angular/router';
 import { EmployeePerformance } from '../../core/models/employee.model';
 import { EmployeeTableComponent } from './employee-table/employee-table.component';
@@ -18,7 +19,7 @@ import { NgApexchartsModule } from 'ng-apexcharts';
   imports: [CommonModule, EmployeeTableComponent, EmployeeDetailComponent, PerfilComponent, NgApexchartsModule, FormsModule, CargaHoras],
   templateUrl: './dashboard.component.html'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   employees: EmployeePerformance[] = [];
   loading: boolean = true;
 
@@ -94,6 +95,7 @@ export class DashboardComponent implements OnInit {
 
   private apiService = inject(ApiService);
   private authService = inject(AuthService);
+  private webSocketService = inject(WebSocketService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private sanitizer = inject(DomSanitizer);
@@ -174,7 +176,15 @@ export class DashboardComponent implements OnInit {
         }
       });
     } else {
-      // Es Administrador o Supervisor: Cargar la vista global normal
+      // Es Administrador o Supervisor: Cargar vista global
+      if (this.usuarioActual && this.usuarioActual.isAdmin) {
+        this.webSocketService.connect();
+        this.webSocketService.subscribeToAttendance().subscribe(event => {
+          console.log('Attendance event received via STOMP:', event);
+          this.backgroundRefresh();
+        });
+      }
+
       if (roleStr === 'SUPERVISOR') {
         this.usuarioActual.name = 'Supervisor de Planta';
       } else {
@@ -182,6 +192,74 @@ export class DashboardComponent implements OnInit {
       }
       this.cargarDatos();
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.productividadSubs) {
+      this.productividadSubs.forEach(sub => {
+        if (sub && typeof sub.unsubscribe === 'function') {
+          sub.unsubscribe();
+        }
+      });
+    }
+    this.webSocketService.disconnect();
+  }
+
+  private productividadSubs: any[] = [];
+
+  subscribeToAllEmployeesProductivity(): void {
+    if (this.productividadSubs) {
+      this.productividadSubs.forEach(sub => {
+        if (sub && typeof sub.unsubscribe === 'function') {
+          sub.unsubscribe();
+        }
+      });
+    }
+    this.productividadSubs = [];
+
+    const isUserAdmin = this.usuarioActual && this.usuarioActual.isAdmin;
+    if (isUserAdmin && this.employees) {
+      this.employees.forEach(emp => {
+        const numericId = parseInt(emp.id.replace('EMP-', ''), 10);
+        if (!isNaN(numericId)) {
+          const sub = this.webSocketService.subscribeToProductividad(numericId).subscribe({
+            next: (kpi) => {
+              console.log(`[WebSocket] Productividad del empleado ${numericId} actualizada:`, kpi);
+              this.backgroundRefresh();
+            },
+            error: (err) => {
+              console.error(`[WebSocket] Error de suscripción para empleado ${numericId}:`, err);
+            }
+          });
+          this.productividadSubs.push(sub);
+        }
+      });
+    }
+  }
+
+  backgroundRefresh(): void {
+    this.apiService.getEmployeeData().subscribe({
+      next: (data) => {
+        data.sort((a, b) => {
+          if (!a.ultimaHoraCarga && !b.ultimaHoraCarga) return 0;
+          if (!a.ultimaHoraCarga) return 1;
+          if (!b.ultimaHoraCarga) return -1;
+          return new Date(b.ultimaHoraCarga).getTime() - new Date(a.ultimaHoraCarga).getTime();
+        });
+        this.employees = data;
+        this.filteredEmployees = data;
+        this.subscribeToAllEmployeesProductivity();
+        this.filtrarEmpleados();
+        this.initCharts();
+        this.cargarSalidasAnticipadas();
+        this.cargarObjetivosIncumplidos();
+        this.cargarReporteSalidasHistorico();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error in backgroundRefresh:', err);
+      }
+    });
   }
 
   cargarDatos(): void {
@@ -196,6 +274,7 @@ export class DashboardComponent implements OnInit {
           });
           this.employees = data;
           this.filteredEmployees = data;
+          this.subscribeToAllEmployeesProductivity();
         this.loading = false;
         this.filtrarEmpleados();
         this.initCharts();

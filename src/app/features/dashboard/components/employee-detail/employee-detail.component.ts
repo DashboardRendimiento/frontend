@@ -141,11 +141,16 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     // Polling cada 15 segundos para mantener objetivos y asistencia al día
     if (typeof window !== 'undefined') {
       this.pollInterval = setInterval(() => {
-        this.cargarReportesFiltrados();
-        this.cargarHorarioYAsistencia();
-        this.cargarKpi();
+        this.cargarTodo();
       }, 15000);
     }
+  }
+
+  cargarTodo(): void {
+    this.cargarReportesFiltrados();
+    this.cargarKpi();
+    this.cargarPromediosPeriodo();
+    this.cargarHorarioYAsistencia();
   }
 
   cargarKpi(): void {
@@ -617,6 +622,48 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
   cargarObjetivosYFaltantes(numericId: number): void {
     this.apiService.obtenerObjetivos(numericId).subscribe({
       next: (objetivos) => {
+        // Asignar pedidosEncargados a TODOS los logs segun su semana
+        this.productivityLogs.forEach(log => {
+          if (log.fecha) {
+             const dateObj = new Date(log.fecha + 'T12:00:00Z');
+             const day = dateObj.getDay();
+             const diff = dateObj.getDate() - day + (day === 0 ? -6 : 1);
+             const logLunes = new Date(dateObj.setDate(diff));
+             const logLunesStr = this.getLocalStartDate(logLunes);
+             const obj = objetivos.find(o => o.tipo === 'PEDIDOS' && o.semanaInicio === logLunesStr);
+             log.pedidosEncargados = obj ? Math.round(obj.valorSemanal / 6) : 0;
+          }
+        });
+        
+        this.filteredLogs.forEach(log => {
+          if (log.fecha && log.pedidosEncargados === undefined) {
+             const dateObj = new Date(log.fecha + 'T12:00:00Z');
+             const day = dateObj.getDay();
+             const diff = dateObj.getDate() - day + (day === 0 ? -6 : 1);
+             const logLunes = new Date(dateObj.setDate(diff));
+             const logLunesStr = this.getLocalStartDate(logLunes);
+             const obj = objetivos.find(o => o.tipo === 'PEDIDOS' && o.semanaInicio === logLunesStr);
+             log.pedidosEncargados = obj ? Math.round(obj.valorSemanal / 6) : 0;
+          }
+        });
+        
+        // Refrescar el grfico de eficacia diaria con los nuevos datos
+        if (this.dailyEfficiencyChartOptions && this.filteredLogs.length > 0) {
+          const chronologicalLogs = [...this.filteredLogs].sort((a, b) => a.fecha.localeCompare(b.fecha));
+          const dates = chronologicalLogs.map(log => {
+            const d = new Date(log.fecha + 'T12:00:00Z');
+            return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}`;
+          });
+          const efficiencies = chronologicalLogs.map(log => {
+            if (log.pedidosEncargados && log.pedidosEncargados > 0) {
+              return Math.round(((log.pedidosPreparados || 0) / log.pedidosEncargados) * 1000) / 10;
+            }
+            return this.employee.efficiencyRate || 0;
+          });
+          this.dailyEfficiencyChartOptions.xaxis = { ...this.dailyEfficiencyChartOptions.xaxis, categories: dates };
+          this.dailyEfficiencyChartOptions.series = [{ name: 'Eficacia Diaria', data: efficiencies }];
+        }
+
         const lunes = this.getLunesDeEstaSemana();
         const objSemana = objetivos.find(o => o.tipo === 'PEDIDOS' && o.semanaInicio === lunes);
         if (objSemana) {
@@ -644,12 +691,10 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
               this.mostrarNotificacionFaltantes = false;
               this.mostrarNotificacionIncumplido = false;
             }
+          } else {
+            this.mostrarNotificacionFaltantes = false;
+            this.mostrarNotificacionIncumplido = false;
           }
-
-          // Asignar el diario a todos los logs de hoy
-          logsHoy.forEach(log => {
-            log.pedidosEncargados = diario;
-          });
         } else {
           this.mostrarNotificacionFaltantes = false;
           this.mostrarNotificacionIncumplido = false;
@@ -797,7 +842,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
         if (res && typeof window !== 'undefined') {
           localStorage.setItem('active_clockin_' + numericId, JSON.stringify(res));
         }
-        this.cargarHorarioYAsistencia();
+        this.cargarTodo();
         this.mostrarAlerta('Éxito', 'Fichaje de entrada registrado correctamente.', 'success');
       },
       error: (err) => {
@@ -836,7 +881,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
         if (res && typeof window !== 'undefined') {
           localStorage.setItem('active_clockin_' + numericId, JSON.stringify(res));
         }
-        this.cargarHorarioYAsistencia();
+        this.cargarTodo();
         this.mostrarAlerta('Éxito', 'Fichaje de entrada registrado correctamente.', 'success');
       },
       error: (err) => {
@@ -907,17 +952,19 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
           if (typeof window !== 'undefined') {
             localStorage.removeItem('active_clockin_' + numericId);
           }
-          this.cargarHorarioYAsistencia();
+          this.cargarTodo();
           this.mostrarAlerta('Éxito', 'Fichaje de salida registrado correctamente.', 'success');
         },
         error: (err) => {
           console.error('Error al fichar salida:', err);
           this.capturandoFoto = false;
-          if (err.status === 409 || err.status === 404) {
+          if (err.status === 403) {
+            this.mostrarAlerta('Error de Permisos', 'No tienes permiso para fichar por este empleado (403).', 'error');
+          } else if (err.status === 409 || err.status === 404) {
             if (typeof window !== 'undefined') {
               localStorage.removeItem('active_clockin_' + numericId);
             }
-            this.cargarHorarioYAsistencia();
+            this.cargarTodo();
             this.mostrarAlerta('Fichaje Sincronizado', 'El fichaje de salida ya estaba registrado en el servidor. Se ha sincronizado el estado.', 'info');
           } else {
             this.mostrarAlerta('Error de Fichaje', err.error?.message || 'No se pudo fichar la salida.', 'error');
@@ -1043,7 +1090,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
         console.log('Productividad registrada con éxito:', res);
         this.cerrarFormularioProductividad();
         this.mostrarAlerta('Éxito', 'Productividad registrada con éxito.', 'success');
-        this.cargarReportesFiltrados(); // Recargar datos locales
+        this.cargarTodo(); // Recargar todos los reportes y KPIs locales
       },
       error: (err: any) => {
         console.error('Error detallado al registrar productividad:', err);
@@ -1087,7 +1134,7 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
           next: () => {
             this.mostrarAlerta('Objetivo Agregado', `¡Se han agregado ${this.pedidosAAsignar} pedidos diarios (${valorSemanalAdicional} semanales). Total: ${Math.round(valorSemanalTotal / 6)} diarios (${valorSemanalTotal} semanales) exitosamente!`, 'success');
             this.asignandoPedidos = false;
-            this.cargarHorarioYAsistencia(); // Esto recargará los objetivos y la UI
+            this.cargarTodo(); // Esto recargará los objetivos y la UI
           },
           error: (err) => {
             console.error('Error al asignar el objetivo:', err);

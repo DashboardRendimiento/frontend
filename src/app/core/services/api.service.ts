@@ -84,7 +84,7 @@ export class ApiService {
 
         // Obtener el KPI individual de cada operario
         const kpiRequests$ = empleados.map(emp =>
-          this.http.get<any>(`${this.baseUrl}/productividad/kpi/empleado/${emp.id}`).pipe(
+          this.http.get<any>(`${this.baseUrl}/productividad/kpi/${emp.id}`).pipe(
             map(kpi => ({ empId: emp.id, kpi })),
             catchError(() => of({ empId: emp.id, kpi: null }))
           )
@@ -225,7 +225,7 @@ export class ApiService {
         })
       );
     }
-    return this.http.get<any>(`${this.baseUrl}/productividad/kpi/empleado/${empleadoId}`).pipe(
+    return this.http.get<any>(`${this.baseUrl}/productividad/kpi/${empleadoId}`).pipe(
       catchError(err => {
         console.warn(` [ApiService] Mocking KPI para empleado ${empleadoId}`);
         return of(null);
@@ -294,7 +294,7 @@ export class ApiService {
   }
 
   clockOut(employeeId: number): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/attendance/${employeeId}/clock-out`, {});
+    return this.http.post<any>(`${this.baseUrl}/attendance/${employeeId}/clock-out`, new FormData());
   }
 
   getAttendanceHistory(employeeId: number): Observable<any[]> {

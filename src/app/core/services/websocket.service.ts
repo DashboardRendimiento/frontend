@@ -48,11 +48,14 @@ export class WebSocketService {
     if (this.stompClient.active) return;
     
     const token = localStorage.getItem('token');
-    if (token) {
-      this.stompClient.connectHeaders = {
-        'Authorization': 'Bearer ' + token
-      };
+    if (!token) {
+      console.warn('[WebSocket] No token found in localStorage. Skipping connection.');
+      return;
     }
+    
+    this.stompClient.connectHeaders = {
+      'Authorization': 'Bearer ' + token
+    };
     
     this.stompClient.activate();
   }
@@ -66,6 +69,11 @@ export class WebSocketService {
 
   public subscribeToProductividad(empleadoId: string | number): Observable<any> {
     const topic = `/topic/productividad/` + empleadoId;
+    return this.getOrCreateSubject(topic);
+  }
+
+  public subscribeToAttendance(): Observable<any> {
+    const topic = `/topic/attendance`;
     return this.getOrCreateSubject(topic);
   }
 
