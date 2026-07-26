@@ -1,27 +1,32 @@
-# --- ETAPA 1: Compilar la app de Angular ---
-FROM node:22-alpine AS builder
+# ---- Etapa 1: Build ----
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
-# Copiar archivos de dependencias e instalarlas
-COPY package*.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Copiar el código fuente y compilar Angular
 COPY . .
-RUN npm run build -- --configuration=production
 
-# --- ETAPA 2: Servir los archivos estáticos con Nginx ---
-FROM nginx:alpine
+RUN npm run build
 
-# IMPORTANTE: Revisa la ruta de 'dist' en tu proyecto.
-# En Angular 17/18 suele ser: /app/dist/<nombre-de-tu-proyecto>/browser
-# En versiones anteriores era: /app/dist/<nombre-de-tu-proyecto>
-COPY --from=builder /app/dist/*/browser /usr/share/nginx/html
+# ---- Etapa 2: Runtime ----
+FROM node:22-alpine AS runtime
 
-# Copiar configuración para soportar rutas de Angular (SPA)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-EXPOSE 80
+ENV NODE_ENV=production
+ENV PORT=4000
 
-CMD ["nginx", "-g", "daemon off;"]
+COPY --from=build /app/dist/frontend ./dist/frontend
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+USER node
+
+EXPOSE 4000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s \
+  CMD wget -qO- http://localhost:4000/ || exit 1
+
+CMD ["node", "dist/frontend/server/server.mjs"]
