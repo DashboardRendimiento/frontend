@@ -8,6 +8,8 @@ RUN npm ci
 
 COPY . .
 
+# Con SSR habilitado, este comando genera tanto el bundle
+# de browser como el de server dentro de dist/frontend
 RUN npm run build
 
 # ---- Etapa 2: Runtime ----
@@ -16,17 +18,12 @@ FROM node:22-alpine AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=4000
 
 COPY --from=build /app/dist/frontend ./dist/frontend
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
-
-USER node
+COPY --from=build /app/package.json ./
+COPY --from=build /app/package-lock.json ./
 
 EXPOSE 4000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s \
-  CMD wget -qO- http://localhost:4000/ || exit 1
 
 CMD ["node", "dist/frontend/server/server.mjs"]
