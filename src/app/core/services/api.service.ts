@@ -10,9 +10,9 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:8080/api';
+  private baseUrl = 'https://frontend-production-2abf.up.railway.app/api';
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
   // Health check
   checkHealth(): Observable<any> {
@@ -335,10 +335,10 @@ export class ApiService {
         const byteCharacters = atob(b64Data);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
         const byteArray = new Uint8Array(byteNumbers);
-        return of(new Blob([byteArray], {type: 'image/png'}));
+        return of(new Blob([byteArray], { type: 'image/png' }));
       })
     );
   }

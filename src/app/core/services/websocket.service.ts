@@ -17,7 +17,7 @@ export class WebSocketService {
 
   constructor() {
     this.stompClient = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      webSocketFactory: () => new SockJS('https://frontend-production-2abf.up.railway.app/ws'),
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
@@ -46,17 +46,17 @@ export class WebSocketService {
 
   public connect(): void {
     if (this.stompClient.active) return;
-    
+
     const token = localStorage.getItem('token');
     if (!token) {
       console.warn('[WebSocket] No token found in localStorage. Skipping connection.');
       return;
     }
-    
+
     this.stompClient.connectHeaders = {
       'Authorization': 'Bearer ' + token
     };
-    
+
     this.stompClient.activate();
   }
 

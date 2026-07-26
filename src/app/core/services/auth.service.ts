@@ -10,7 +10,7 @@ export interface LoginResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:8080/api/auth';
+  private baseUrl = 'https://frontend-production-2abf.up.railway.app/api/auth';
   private http = inject(HttpClient);
 
   login(email: string, password: string): Observable<LoginResponse> {
