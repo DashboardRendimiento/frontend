@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'https://frontend-production-2abf.up.railway.app/api';
+  private baseUrl = 'https://backend-production-8a80.up.railway.app/api';
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 

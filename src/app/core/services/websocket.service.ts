@@ -17,7 +17,7 @@ export class WebSocketService {
 
   constructor() {
     this.stompClient = new Client({
-      webSocketFactory: () => new SockJS('https://frontend-production-2abf.up.railway.app/ws'),
+      webSocketFactory: () => new SockJS('https://backend-production-8a80.up.railway.app/ws'),
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
