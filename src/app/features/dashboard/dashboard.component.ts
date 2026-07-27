@@ -219,6 +219,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const isUserAdmin = this.usuarioActual && this.usuarioActual.isAdmin;
     if (isUserAdmin && this.employees) {
+      if (this.employees.length > 15) {
+        console.warn('[WebSocket] Demasiados empleados para suscribirse individualmente.');
+        return;
+      }
       this.employees.forEach(emp => {
         const numericId = parseInt(emp.id.replace('EMP-', ''), 10);
         if (!isNaN(numericId)) {

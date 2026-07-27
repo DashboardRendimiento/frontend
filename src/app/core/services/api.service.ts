@@ -82,6 +82,30 @@ export class ApiService {
           return of([]);
         }
 
+        if (empleados.length > 15) {
+          const mapped = empleados.map(emp => {
+            const idStr = 'EMP-' + String(emp.id).padStart(3, '0');
+            const lastName = emp.apellido === 'Sin apellido' ? '' : (emp.apellido || '');
+            const displayName = `${emp.nombre} ${lastName}`.trim();
+            return {
+              id: idStr,
+              name: displayName,
+              role: emp.puesto || 'Operario',
+              shift: emp.turno || 'Mañana',
+              dni: emp.dni,
+              active: emp.active !== false,
+              totalPedidos: 0,
+              totalPendientes: 0,
+              pedidosPorHora: 0,
+              promedioPedidosPorJornada: 0,
+              porcentajeCumplimiento: 0,
+              ultimaHoraCarga: null,
+              objetivoDiario: 0
+            };
+          });
+          return of(mapped);
+        }
+
         // Obtener el KPI individual de cada operario
         const kpiRequests$ = empleados.map(emp =>
           this.http.get<any>(`${this.baseUrl}/productividad/kpi/${emp.id}`).pipe(
