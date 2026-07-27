@@ -72,6 +72,11 @@ export class WebSocketService {
     return this.getOrCreateSubject(topic);
   }
 
+  public subscribeToObjetivos(empleadoId: string | number): Observable<any> {
+    const topic = `/topic/objetivos/` + empleadoId;
+    return this.getOrCreateSubject(topic);
+  }
+
   public subscribeToAttendance(): Observable<any> {
     const topic = `/topic/attendance`;
     return this.getOrCreateSubject(topic);

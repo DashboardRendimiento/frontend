@@ -129,6 +129,8 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     return `${year}-${month}-${day}`;
   }
 
+  private objetivoSubscription: any = null;
+
   ngOnInit(): void {
     this.isAdminUser = this.authService.isAdmin();
     this.isEmployeeUser = this.authService.isEmployee();
@@ -144,6 +146,8 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
         this.cargarTodo();
       }, 15000);
     }
+
+    this.conectarWebSocketObjetivos();
   }
 
   cargarTodo(): void {
@@ -229,6 +233,31 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     if (this.pollInterval) {
       clearInterval(this.pollInterval);
     }
+    if (this.objetivoSubscription && typeof this.objetivoSubscription.unsubscribe === 'function') {
+      this.objetivoSubscription.unsubscribe();
+    }
+  }
+
+  private conectarWebSocketObjetivos(): void {
+    const numericId = typeof this.employee.id === 'number'
+      ? this.employee.id
+      : parseInt((this.employee.id || '').replace(/\D/g, ''), 10);
+
+    if (!numericId) {
+      return;
+    }
+
+    this.wsService.connect();
+    this.objetivoSubscription = this.wsService.subscribeToObjetivos(numericId).subscribe({
+      next: (objetivo) => {
+        console.log('[WebSocket] Objetivo actualizado recibido:', objetivo);
+        this.mostrarAlerta('Objetivo Actualizado', 'Tu objetivo ha sido asignado o actualizado correctamente. Se actualizará la vista automáticamente.', 'success');
+        this.cargarTodo();
+      },
+      error: (err) => {
+        console.error('[WebSocket] Error en suscripción de objetivos:', err);
+      }
+    });
   }
 
   establecerFiltroPredeterminado(): void {
